@@ -1,7 +1,8 @@
-#xuntos .img .h1
+#xuntos
 {
     position: relative;
     margin-right: auto;
     margin-left: auto;
     display: block;
+    text-align: center;
 }
