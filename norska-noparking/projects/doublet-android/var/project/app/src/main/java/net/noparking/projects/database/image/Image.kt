@@ -1,0 +1,18 @@
+package net.noparking.projects.database.image
+
+import android.arch.persistence.room.*
+import android.graphics.Color
+import android.net.Uri
+import android.support.annotation.ColorInt
+
+@Entity(tableName = "images")
+data class Image(@PrimaryKey(autoGenerate = true) var id: Long?,
+                 @ColumnInfo(name = "project_id") var project_id: Long,
+                 @ColumnInfo(name = "file_name") var file_name: String,
+                 @ColumnInfo(name = "image_name") var image_name: String,
+                 @ColumnInfo(name = "uri") var uri: String,
+                 @ColumnInfo(name = "creation_time") var creation_time: Long,
+				 @ColumnInfo(name = "last_modification_time") var last_modification_time: Long,
+				 @ColumnInfo(name = "color") var color: Int) {
+    constructor():this(null,0,"", "", "", 0, 0, Color.TRANSPARENT)
+}

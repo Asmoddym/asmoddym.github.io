@@ -1,0 +1,232 @@
+package net.noparking.projects.activity
+
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.net.Uri
+import android.support.v7.app.AppCompatActivity
+import android.os.Bundle
+import android.util.Log
+import android.util.TypedValue
+import android.view.*
+import android.widget.TextView
+import kotlinx.android.synthetic.main.activity_project_manager.*
+import net.noparking.projects.R
+import net.noparking.projects.adapter.TextViewAdapter
+import net.noparking.projects.database.image.Image
+import net.noparking.projects.database.image.ImageAsyncDelete
+import net.noparking.projects.database.image.ImageAsyncInsert
+import net.noparking.projects.database.image.ImagesCollector
+import net.noparking.projects.database.project.Project
+import net.noparking.projects.database.project.ProjectAsyncInsert
+import net.noparking.projects.database.project.ProjectsCollector
+import net.noparking.projects.utl.*
+import java.io.File
+
+class ProjectManagerActivity : AppCompatActivity() {
+	private val _projects_collector = ProjectsCollector()
+	private val _images_collector = ImagesCollector()
+
+	private lateinit var _root_directory: Directory
+	private lateinit var _project_directory: Directory
+	private var _image_picker: ImagePicker? = null
+
+	private var _project: Project? = null
+
+	private lateinit var _images_list: LiveData<List<Image>>
+	private lateinit var _projects_list: LiveData<List<Project>>
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+
+		requestWindowFeature(Window.FEATURE_NO_TITLE)
+		this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
+		setContentView(R.layout.activity_project_manager)
+
+		initCollectors()
+
+		initSupportActionBar()
+		retrieveProjectInfos()
+	}
+
+	private fun initCollectors() {
+		_images_collector.init(baseContext)
+		_projects_collector.init(baseContext)
+		_projects_list = _projects_collector.getAll()
+		_projects_list.observe(this, Observer {})
+	}
+
+	private fun initSupportActionBar() {
+		supportActionBar?.setDisplayHomeAsUpEnabled(true)
+		supportActionBar?.setDisplayShowHomeEnabled(true)
+	}
+
+	override fun onSupportNavigateUp(): Boolean {
+		finish()
+		return super.onSupportNavigateUp()
+	}
+
+	private fun retrieveProjectInfos() {
+		_projects_collector.getById(intent.getLongExtra("project_id", 0)).observe(this, Observer<Project> {
+			if (it != null) {
+				_project = it
+				updateTitle()
+				initDirectories(it.directory)
+				retrieveProjectImages(it)
+				initViewItems()
+			}
+		})
+	}
+
+	private fun updateTitle() {
+		title = getString(R.string.project) + " \"" + _project!!.project_name + "\""
+		if (_project!!.color == Color.TRANSPARENT) {
+		}
+		if (_project!!.color != Color.TRANSPARENT) {
+			supportActionBar?.setBackgroundDrawable(ColorDrawable(_project!!.color))
+		}
+	}
+
+	private fun retrieveProjectImages(project: Project) {
+		_images_list = _images_collector.init(baseContext).getByProjectId(project.id!!)
+		_images_list.observe(this, Observer { list ->
+			if (list != null && list.isNotEmpty()) {
+				project_manager_images_list.visibility = View.VISIBLE
+				project_manager_no_images.visibility = View.GONE
+
+				val array: ArrayList<TextView> = arrayListOf()
+				list.forEach {image ->
+					val view = TextView(this)
+					view.text = image.image_name
+					view.minimumHeight = 20
+					view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 23f)
+
+					view.setOnClickListener { goToImageEdition(image) }
+					view.setOnLongClickListener { goToImageParametring(image);true }
+					array.add(view)
+				}
+				val adapter = TextViewAdapter(baseContext, array)
+				project_manager_images_list.adapter = adapter
+			} else {
+				project_manager_images_list.visibility = View.GONE
+				project_manager_no_images.visibility = View.VISIBLE
+			}
+		})
+	}
+
+	private fun initDirectories(directory_name: String) {
+		_root_directory = Directory(baseContext.filesDir, getString(R.string.projects_directory))
+		_root_directory.create()
+		_project_directory = Directory(_root_directory.getPath(), directory_name)
+		_project_directory.create()
+	}
+
+	private fun initViewItems() {
+		_image_picker = ImagePicker(this, _project_directory)
+
+		project_manager_new_image.setOnClickListener { _image_picker?.show() }
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+		super.onActivityResult(requestCode, resultCode, data)
+		val new_image = _image_picker!!.onActivityResult(requestCode, resultCode, data)
+		saveImage(new_image)
+	}
+
+	private fun saveImage(image: net.noparking.projects.utl.Image) {
+		val to_save = Image()
+
+		to_save.file_name = image.file_name
+		to_save.uri = image.uri.toString()
+		to_save.project_id = _project?.id!!
+
+		ProjectItemParametring(this)
+				.setDefaultInput(image.file_name)
+				.setOnSaveAction { name, color ->
+					to_save.image_name = name
+					to_save.color = color
+					ImageAsyncInsert().init(baseContext).afterQuery { to_save.id = it; goToImageEdition(to_save) }.execute(to_save)
+				}
+				.show()
+	}
+
+	override fun onResume() {
+		super.onResume()
+		_image_picker?.reset()
+	}
+
+	private fun goToImageEdition(image: Image) {
+		val intent = Intent(this, ImageEditionActivity::class.java)
+		intent.putExtra("image_id", image.id)
+		intent.putExtra("image_uri", Uri.parse(image.uri))
+		intent.putExtra("image_file", File(_project_directory.getPath(), image.file_name))
+		startActivity(intent)
+	}
+
+	private fun changeProjectParameters() {
+		ProjectItemParametring(this)
+				.setDefaultColor(_project?.color!!)
+				.setDefaultInput(_project?.project_name!!)
+				.setOnSaveAction { name, color ->
+					_project?.project_name = name
+					_project?.color = color
+					ProjectAsyncInsert().init(baseContext).execute(_project)
+					updateTitle()
+				}
+				.setComparisonMethod { name -> compareProjectNames(name) }
+				.show()
+	}
+
+	private fun goToImageParametring(image: Image) {
+		val param = ProjectItemParametring(this)
+		param.setDefaultInput(image.image_name)
+				.setComparisonMethod { name -> compareImageNames(name) }
+				.setOnSaveAction { name, color ->
+					image.image_name = name
+					image.color = color
+					ImageAsyncInsert().init(baseContext).execute(image)
+				}
+				.setOnDeleteAction { ImageAsyncDelete().init(baseContext).deleteById(image.id!!).execute() }
+				.show()
+	}
+
+	private fun compareImageNames(name: String): Boolean {
+		if (_images_list.value != null || _images_list.value!!.isNotEmpty()) {
+			_images_list.value?.forEach { image ->
+				if (image.image_name == name) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	private fun compareProjectNames(name: String): Boolean {
+		if (_projects_list.value != null && _projects_list.value!!.isNotEmpty()) {
+			_projects_list.value?.forEach { project ->
+				if (project.project_name == name) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+		super.onOptionsItemSelected(item)
+		when (item?.itemId) {
+			R.id.menu_project_manager_main_project_parameters -> { changeProjectParameters() }
+			else -> { finish() }
+		}
+		return true
+	}
+
+	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+		super.onCreateOptionsMenu(menu)
+		menuInflater.inflate(R.menu.menu_project_manager_main, menu)
+		return true
+	}
+}

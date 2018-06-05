@@ -1,0 +1,183 @@
+<?php
+/*
+	opentime
+	$Author$
+	$URL$
+	$Revision$
+
+	Copyright (C) No Parking 2011 - 2018
+*/
+
+class Theme_Default {
+	function css_files() {
+		$files = array(
+			'decoration.css' => "medias/css/decoration.css",
+			'styles_print.css' => "medias/css/styles_print.css",
+			'colorpicker.css' => "medias/css/colorpicker.css",
+			'jquery.tooltip.css' => "medias/css/jquery.tooltip/jquery.tooltip.css",
+		);
+		return $files;
+	}
+
+	function css() {
+		$files = $this->css_files();
+		foreach (Plugins::call_hook("css_files", array()) as $plugin => $plugin_files) {
+			$files = array_merge($files, $plugin_files);
+		}
+		return show_css_files($files);
+	}
+
+	function js_files() {
+		$js_files = array();
+		
+		if (isset($GLOBALS['param']['layout_jspacked']) && $GLOBALS['param']['layout_jspacked']) {
+			$js_files['jquery.packed.js'] = "medias/js/jquery.packed.js";
+		} else {
+			$js_files['jquery.js'] = "medias/js/jquery.js";
+		}
+
+		$js_files['common.js'] = "medias/js/common.js";
+		$js_files['calendar.js'] = "medias/js/calendar.js";
+		$js_files['event.js'] = "medias/js/event.js";
+		$js_files['chart.js'] = "medias/js/chart.js";
+		
+		$js_files['jquery.filter.js'] = "medias/js/jquery.filter.js";
+		$js_files['jquery.common.js'] = "medias/js/jquery.common.js";
+		$js_files['jquery.colorpicker.js'] = "medias/js/jquery.colorpicker.js";
+		$js_files['jquery.form.js'] = "medias/js/jquery.form.js";
+		$js_files['jquery.ajaxform.js'] = "medias/js/jquery.ajaxform.js";
+		$js_files['jquery.modal.js'] = "medias/js/jquery.modal.js";
+		$js_files['jquery.projects.js'] = "medias/js/jquery.projects.js";
+		$js_files['jquery.tablehover.js'] = "medias/js/jquery.tablehover.js";
+		$js_files['jquery.tooltip.js'] = "medias/js/jquery.tooltip.js";
+		$js_files['jquery.expenses.js'] = "medias/js/jquery.expenses.js";
+
+		if ($GLOBALS['param']['ext_calendar']) {
+			$js_files['jquery.calendar.js'] = "medias/js/jquery.calendar.js";
+		}
+
+		if ($GLOBALS['param']['ext_contacts']) {
+			$js_files['jquery.contact.js'] = "medias/js/jquery.contact.js";
+		}
+
+		if ($GLOBALS['param']['ext_chargeplan']) {
+			switch ($GLOBALS['param']['chargeplan_period']) {
+				case "2h":
+					$js_files['jquery.followupchargeplan.js'] = "medias/js/jquery.followupchargeplan.js";
+					break;
+				case "d":
+					$js_files['jquery.boxes.js'] = "medias/js/jquery.boxes.js";
+					break;
+			}
+		}
+
+		if (isset($GLOBALS['content'])) {
+			if ($GLOBALS['content'] == "configrequests.php") {
+				$js_files['requests.js'] = "medias/js/requests.js";
+			}
+
+			if (preg_match("/followupprojects\.php$/", $GLOBALS['content'])) {
+				$js_files['jquery.followupprojects.js'] = "medias/js/jquery.followupprojects.js";
+			}
+
+			if ($GLOBALS['content'] == "invoice.php" or $GLOBALS['content'] == "projectquote.php") {
+				$js_files['jquery.quotes-invoices.js'] = "medias/js/jquery.quotes-invoices.js";
+			}
+
+			if ($GLOBALS['content'] == "user.php") {
+				$js_files['requests.js'] = "medias/js/jquery.users.js";
+			}
+
+			if ($GLOBALS['content'] == "usertime.php") {
+				if ($GLOBALS['param']['hours_taskid'] and $GLOBALS['param']['hours_taskestimated']) {
+					$js_files['jquery.hourtaskestimated.js'] = "medias/js/jquery.hourtaskestimated.js";
+				}
+				$js_files['jquery.hoursquarter.js'] = "medias/js/jquery.hoursquarter.js";
+				$js_files['jquery.hoursdetail.js'] = "medias/js/jquery.hoursdetail.js";
+			}
+			if ($GLOBALS['content'] == "followuptime.php") {
+				$js_files['jquery.hoursquarter.js'] = "medias/js/jquery.hoursquarter.js";
+			}
+			if ($GLOBALS['content'] == "projecttime.php") {
+				$js_files['jquery.hoursquarter.js'] = "medias/js/jquery.hoursquarter.js";
+			}
+			if ($GLOBALS['content'] == "useroptiondateddailydetails.php") {
+				$js_files['jquery.dailydetails.js'] = "medias/js/jquery.dailydetails.js";
+			}
+		}
+
+		return $js_files;
+	}
+
+	function javascript() {
+		$files = $this->js_files();
+		foreach (Plugins::call_hook("js_files", array()) as $plugin => $plugin_files) {
+			$files = array_merge($files, $plugin_files);
+		}
+		return show_js_files($files);
+	}
+
+	function head() {
+		return "<head>
+			<title>".($GLOBALS['config']['title'] == '' ? '' : $GLOBALS['config']['title']." : ").$GLOBALS['config']['name']."</title>
+			<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />".
+			$this->css().
+			$this->javascript().
+			$this->favicon()."
+		</head>";
+	}
+
+	function favicon() {
+		$image = $GLOBALS['config']['layout_mediaserver']."medias/images/favicon.ico";
+		return "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"".$image."\" />\n";
+	}
+
+	function html_top() {
+		return "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">
+			<html>";
+	}
+
+	function body_top($location, $content = "", $context = "", $frame = "") {
+		Plugins::call_hook("body", array());
+		return "<body class=\"".Format::body_class($location)." ".Format::body_class($content)." ".Format::body_class($context)." ".Format::body_class($frame)."\">";
+	}
+
+	function details_top() {
+		return "<div class=\"content_details\">
+			<div class=\"content_details_top_name\">".$GLOBALS['config']['name']."</div>
+			<div>";
+	}
+
+	function details_bottom() {
+		return "</div>
+			</div>";
+	}
+
+	function content_top($content = "") {
+		return "<div class=\"content_wrapper\">
+			<div class=\"content\">
+			<div class=\"content_outer\">".
+			Header_Area::show()."
+			<div class=\"content_0\">";
+	}
+
+	function content_bottom() {
+		$copyright_area = Plugins::factory("Copyright_Area");
+		return "</div>".
+			$copyright_area->show().
+			Todo_Area::show($GLOBALS['param']['ext_todo'])."
+			</div>".
+			Logo_Area::show().
+			Footer_Area::show()."
+			</div>
+			</div>";
+	}
+
+	function body_bottom() {
+		return "<br /><br /></body>";
+	}
+
+	function html_bottom() {
+		return "</html>";
+	}
+}

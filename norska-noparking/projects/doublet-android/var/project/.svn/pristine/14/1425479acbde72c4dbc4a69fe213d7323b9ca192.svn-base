@@ -1,0 +1,53 @@
+package net.noparking.projects
+
+import android.app.Activity
+import android.arch.lifecycle.Observer
+import android.content.Intent
+import android.support.v7.app.AppCompatActivity
+import android.os.Bundle
+import android.provider.ContactsContract
+import android.support.v4.content.FileProvider
+import android.util.Log
+import kotlinx.android.synthetic.main.activity_main.*
+import net.noparking.projects.activity.ImageEditionActivity
+import net.noparking.projects.activity.ProjectsManagerActivity
+import net.noparking.projects.database.image.ImagesCollector
+import net.noparking.projects.database.polygon.PolygonsCollector
+import net.noparking.projects.database.project.ProjectsCollector
+import net.noparking.projects.utl.Image
+import java.io.File
+
+class MainActivity : AppCompatActivity() {
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		setContentView(R.layout.activity_main)
+        initItems()
+	}
+
+	fun initItems() {
+
+////CAMERA NORMALE
+//        val image = Image(baseContext, null, contentResolver)
+//        image.file = File(File(filesDir, "doublet-projects"), "JPEG_20180515_113316.jpg")
+//        image.uri = FileProvider.getUriForFile(baseContext, baseContext.packageName + ".fileprovider", File(File(filesDir, "doublet-projects"), "JPEG_20180515_113316.jpg"))
+//        val intent = Intent(this, ImageEditionActivity::class.java)
+//        intent.putExtra("image_uri", image.uri)
+//        intent.putExtra("image_file", image.file)
+//        startActivity(intent)
+
+//// CAMERA FRONTALE
+//        val image = Image(baseContext, contentResolver)
+//        image.file = File(File(filesDir, "doublet-projects"), "JPEG_20180515_113342.jpg")
+//        image.uri = FileProvider.getUriForFile(baseContext, baseContext.packageName + ".fileprovider", File(File(filesDir, "doublet-projects"), "JPEG_20180515_113342.jpg"))
+//        val intent = Intent(this, ImageEditionActivity::class.java)
+//        intent.putExtra("image_uri", image.uri)
+//        intent.putExtra("image_file", image.file)
+//        startActivity(intent)
+//
+
+//        main_button_projects.setOnClickListener {
+		val intent = Intent(this, ProjectsManagerActivity::class.java)
+		startActivity(intent)
+//        }
+	}
+}

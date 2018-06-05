@@ -1,0 +1,14 @@
+package net.noparking.projects.database.polygon_annotation
+
+import android.arch.persistence.room.*
+
+@Entity(tableName = "polygon_annotations")
+data class PolygonAnnotation(@PrimaryKey(autoGenerate = true) var id: Long?,
+                             @ColumnInfo(name = "polygon_id") var polygon_id: Long,
+                             @ColumnInfo(name = "image_id") var image_id: Long,
+                             @ColumnInfo(name = "width") var width: Float,
+                             @ColumnInfo(name = "height") var height: Float,
+                             @ColumnInfo(name = "surface") var surface: Float,
+                             @ColumnInfo(name = "comment") var comment: String) {
+    constructor() : this(null, 0, 0, 0f, 0f, 0f, "")
+}

@@ -1,0 +1,198 @@
+package net.noparking.projects.view.ImageEditionView.canvas
+
+import android.app.Activity
+import android.content.Context
+import android.graphics.*
+import android.os.Handler
+import android.os.Message
+import android.support.v7.app.AppCompatActivity
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import net.noparking.projects.view.ImageEditionView.canvas.modes.AnnotationsMode
+import net.noparking.projects.view.ImageEditionView.canvas.modes.PencilDrawingMode
+import net.noparking.projects.view.ImageEditionView.canvas.modes.PolygonsDrawingMode
+import net.noparking.projects.view.ImageEditionView.canvas.modes.utl.DrawingModes
+import android.util.Log
+import android.view.ViewConfiguration
+import android.widget.Toast
+
+class CanvasView(internal var context: Context, attrs: AttributeSet): View(context, attrs) {
+	private lateinit var _polygons_mode: PolygonsDrawingMode
+	private lateinit var _pencil_mode: PencilDrawingMode
+	private lateinit var _annotations_mode: AnnotationsMode
+	private var _color = 0
+	var drawing_mode = DrawingModes.POLYGON
+
+	fun init(image_id: Long, parent_activity: AppCompatActivity) {
+		_color = Color.CYAN
+		_pencil_mode = PencilDrawingMode(context, image_id)
+
+		_polygons_mode = PolygonsDrawingMode(context, image_id, parent_activity, this)
+		_annotations_mode = AnnotationsMode(context, _polygons_mode.getPolygons(), image_id, parent_activity)
+
+		_polygons_mode.initAndExecute({ _annotations_mode.init() })
+	}
+
+	fun setColor(color: Int) {
+		_color = color
+		invalidate()
+	}
+
+	fun setClearMode(): Boolean {
+		_polygons_mode.clear_mode = !_polygons_mode.clear_mode
+		_annotations_mode.clear_mode = !_annotations_mode.clear_mode
+		drawing_mode = DrawingModes.POLYGON
+		invalidate()
+		return _polygons_mode.clear_mode
+	}
+
+	fun clear() {
+		_polygons_mode.clear()
+		_pencil_mode.clear()
+		_annotations_mode.clear()
+		invalidate()
+	}
+
+	fun setDrawingMode(mode: Int) {
+		_polygons_mode.clear_mode = false
+		_annotations_mode.clear_mode = false
+		drawing_mode = mode
+		if (drawing_mode == DrawingModes.POLYGON) {
+			_polygons_mode.enableRedimensionning(true)
+		} else {
+			_polygons_mode.enableRedimensionning(false)
+		}
+		invalidate()
+	}
+
+	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+		super.onSizeChanged(w, h, oldw, oldh)
+	}
+
+	override fun onDraw(canvas: Canvas) {
+		super.onDraw(canvas)
+
+		_polygons_mode.onDraw(canvas)
+		_pencil_mode.onDraw(canvas)
+		_annotations_mode.onDraw(canvas)
+	}
+
+	override fun onTouchEvent(event: MotionEvent): Boolean {
+		val x = event.x
+		val y = event.y
+
+		when (event.action) {
+			MotionEvent.ACTION_DOWN -> {
+				downTouch(x, y)
+				invalidate()
+			}
+			MotionEvent.ACTION_MOVE -> {
+				moveTouch(x, y)
+				invalidate()
+			}
+			MotionEvent.ACTION_UP -> {
+				upTouch(x, y)
+				invalidate()
+			}
+		}
+		return true
+	}
+
+	private fun downTouch(x: Float, y: Float) {
+		when (drawing_mode) {
+			DrawingModes.POLYGON -> _polygons_mode.downTouch(x, y, _color)
+			DrawingModes.PENCIL -> _pencil_mode.downTouch(x, y, _color)
+			DrawingModes.ANNOTATIONS -> _annotations_mode.downTouch(x, y)
+		}
+	}
+
+	private fun moveTouch(x: Float, y: Float) {
+		when (drawing_mode) {
+			DrawingModes.POLYGON -> _polygons_mode.moveTouch(x, y)
+			DrawingModes.PENCIL -> _pencil_mode.moveTouch(x, y)
+			DrawingModes.ANNOTATIONS -> _annotations_mode.moveTouch(x, y)
+		}
+	}
+
+	private fun upTouch(x: Float, y: Float) {
+		when (drawing_mode) {
+			DrawingModes.POLYGON -> _polygons_mode.upTouch(x, y, _color)
+			DrawingModes.PENCIL -> _pencil_mode.upTouch(x, y)
+			DrawingModes.ANNOTATIONS -> _annotations_mode.upTouch(x, y)
+		}
+	}
+
+	fun destroy() {
+		_polygons_mode.saveAndExecute({ _annotations_mode.save() })
+	}
+}
+
+//
+//class CanvasView(internal var context: Context, attrs: AttributeSet): View(context, attrs) {
+//
+//	private lateinit var _polygons: PolygonsEditionMode
+//
+//	fun init(image_id: Long, parent_activity: AppCompatActivity) {
+//		_polygons = PolygonsEditionMode(context, image_id, parent_activity, this)
+//	}
+//
+//	fun setColor(color: Int) {
+//		invalidate()
+//	}
+//
+//	fun setClearMode() {
+//		invalidate()
+//	}
+//
+//	fun clear() {
+//		invalidate()
+//	}
+//
+//	fun setDrawingMode(mode: Int) {
+//		invalidate()
+//	}
+//
+//	override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+//		super.onSizeChanged(w, h, oldw, oldh)
+//	}
+//
+//	override fun onDraw(canvas: Canvas) {
+//		super.onDraw(canvas)
+//		_polygons.onDraw(canvas)
+//	}
+//
+//	override fun onTouchEvent(event: MotionEvent): Boolean {
+//		val x = event.x
+//		val y = event.y
+//
+//		when (event.action) {
+//			MotionEvent.ACTION_DOWN -> {
+//				downTouch(x, y)
+//			}
+//			MotionEvent.ACTION_MOVE -> {
+//				moveTouch(x, y)
+//			}
+//			MotionEvent.ACTION_UP -> {
+//				upTouch(x, y)
+//			}
+//		}
+//		invalidate()
+//		return true
+//	}
+//
+//	private fun downTouch(x: Float, y: Float) {
+//		_polygons.downTouch(x, y)
+//	}
+//
+//	private fun moveTouch(x: Float, y: Float) {
+//		_polygons.moveTouch(x, y)
+//	}
+//
+//	private fun upTouch(x: Float, y: Float) {
+//		_polygons.upTouch(x, y)
+//	}
+//
+//	fun destroy() {
+//	}
+//}

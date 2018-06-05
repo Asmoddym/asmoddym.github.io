@@ -1,0 +1,36 @@
+package net.noparking.projects.view.ImageEditionView.canvas.modes
+
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.support.v7.app.AppCompatActivity
+import net.noparking.projects.view.ImageEditionView.canvas.CanvasView
+
+class PolygonsEditionMode(internal val context: Context, internal val image_id: Long, internal val parent_activity: AppCompatActivity, internal val parent_view: CanvasView) {
+	init {
+	}
+
+	fun init() {
+		retrieveFromDatabase()
+	}
+
+	fun onDraw(canvas: Canvas) {
+	}
+
+	fun downTouch(x: Float, y: Float) {
+	}
+
+	fun moveTouch(x: Float, y: Float) {
+	}
+
+	fun upTouch(x: Float, y: Float) {
+	}
+
+	private fun retrieveFromDatabase() {
+	}
+
+	fun save() {
+	}
+}

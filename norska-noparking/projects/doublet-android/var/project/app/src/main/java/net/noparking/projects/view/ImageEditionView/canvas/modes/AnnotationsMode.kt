@@ -1,0 +1,135 @@
+package net.noparking.projects.view.ImageEditionView.canvas.modes
+
+import android.arch.lifecycle.Observer
+import android.content.Context
+import android.graphics.*
+import net.noparking.projects.view.ImageEditionView.canvas.modes.utl.polygon.Polygon
+import android.support.v7.app.AppCompatActivity
+import android.util.Log
+import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_image_editing.*
+import net.noparking.projects.R
+import net.noparking.projects.database.polygon.PolygonsCollector
+import net.noparking.projects.database.polygon_annotation.PolygonAnnotation
+import net.noparking.projects.database.polygon_annotation.PolygonAnnotationAsyncDelete
+import net.noparking.projects.database.polygon_annotation.PolygonAnnotationAsyncInsert
+import net.noparking.projects.database.polygon_annotation.PolygonAnnotationsCollector
+import net.noparking.projects.view.ImageEditionView.canvas.modes.utl.polygon.PolygonAnnotationPicker
+
+class AnnotationsMode(internal val context: Context,
+					  internal val polygons: MutableList<Polygon>,
+					  internal val image_id: Long,
+					  internal val parent_activity: AppCompatActivity) {
+	private val _polygons_annotations: MutableMap<Polygon, PolygonAnnotation> = mutableMapOf()
+	private val _picker = PolygonAnnotationPicker(parent_activity)
+
+	var clear_mode = false
+
+	private var _bounds = RectF()
+	private var _center = PointF()
+	private val _paint = Paint()
+
+	init {
+		_paint.isAntiAlias = true
+		_paint.color = Color.WHITE
+		_paint.style = Paint.Style.STROKE
+		_paint.strokeJoin = Paint.Join.ROUND
+		_paint.strokeWidth = 3f
+		_paint.textSize = 50f
+	}
+
+	fun init() {
+		_polygons_annotations.clear()
+		retrieveFromDatabase()
+	}
+
+	fun clear() {}
+
+	fun onDraw(canvas: Canvas) {
+		_polygons_annotations.forEach { entry ->
+			polygons.forEach { polygon ->
+				if (polygon.db_id == 0.toLong()) {
+					if (polygon.id == entry.key.id) {
+						polygon.global_path.computeBounds(_bounds, true)
+						_center.x = (_bounds.left + _bounds.right) / 2
+						_center.y = (_bounds.top + _bounds.bottom) / 2
+						canvas.drawText(entry.value.surface.toString() + context.getString(R.string.unit_surface_annotations), _center.x, _center.y, _paint)
+					}
+				} else {
+					if (polygon.db_id == entry.key.db_id) {
+						polygon.global_path.computeBounds(_bounds, true)
+						_center.x = (_bounds.left + _bounds.right) / 2
+						_center.y = (_bounds.top + _bounds.bottom) / 2
+						canvas.drawText(entry.value.surface.toString() + context.getString(R.string.unit_surface_annotations), _center.x, _center.y, _paint)
+					}
+				}
+			}
+		}
+	}
+
+	fun downTouch(x: Float, y: Float) {
+		polygons.forEach {polygon ->
+			val bounds = RectF()
+			polygon.global_path.computeBounds(bounds, true)
+
+			val r = Region()
+			r.setPath(polygon.global_path, Region(bounds.left.toInt(), bounds.top.toInt(), bounds.right.toInt(), bounds.bottom.toInt()))
+			if (r.contains(x.toInt(), y.toInt())) {
+				val tmp = when (_polygons_annotations.containsKey(polygon)) {
+					true -> _polygons_annotations[polygon]!!
+					else -> PolygonAnnotation()
+				}
+				_picker.init()
+						.setData(tmp)
+						.setOnDeleteAction { _ ->
+							_polygons_annotations.remove(polygon)
+							parent_activity.image_edition_imageeditionview.getCanvas().invalidate()
+						}
+						.setOnSaveAction { id, width, height, surface, comment ->
+							if (id == 0.toLong()) {
+								_polygons_annotations[polygon] = PolygonAnnotation()
+							}
+							_polygons_annotations[polygon]!!.height = height
+							_polygons_annotations[polygon]!!.width = width
+							_polygons_annotations[polygon]!!.surface = surface
+							_polygons_annotations[polygon]!!.comment = comment
+							parent_activity.image_edition_imageeditionview.getCanvas().invalidate()
+						}
+						.show()
+			}
+		}
+	}
+
+	fun moveTouch(x: Float, y: Float) {}
+	fun upTouch(x: Float, y: Float) {}
+
+	private fun retrieveFromDatabase() {
+		val collector = PolygonAnnotationsCollector().init(context)
+		polygons.forEach { polygon ->
+			Log.e("ANNOTATIONS " + polygon.db_id, "trying to get annotation for polygon")
+			collector.getByPolygonId(polygon.db_id).observe(parent_activity, Observer { annotation ->
+				Log.e("ANNOTATION " + annotation?.id, "found !")
+				if (annotation != null) {
+					_polygons_annotations[polygon] = annotation
+				}
+				parent_activity.image_edition_imageeditionview.getCanvas().invalidate()
+			})
+		}
+	}
+
+	fun save() {
+		Log.e("ANNOTATIONS", "saving (" + _polygons_annotations.size.toString() + ")")
+		PolygonAnnotationAsyncDelete().init(context).deleteByImageId(image_id).afterQuery {
+			val polygons_collector = PolygonsCollector().init(context)
+
+			_polygons_annotations.forEach { entry ->
+				Log.e("ANNOTATION " + entry.key.db_id.toString(), "trying to save")
+				entry.value.polygon_id = entry.key.db_id
+				PolygonAnnotationAsyncInsert().init(context).afterQuery {
+					Log.e("ANNOTATION " + entry.key.db_id.toString(), "SAVED " + it.toString())
+				}.execute(entry.value)
+			}
+			polygons_collector.stop()
+		}.execute()
+	}
+}

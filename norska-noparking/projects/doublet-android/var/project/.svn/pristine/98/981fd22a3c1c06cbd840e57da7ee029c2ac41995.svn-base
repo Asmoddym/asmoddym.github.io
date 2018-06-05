@@ -1,0 +1,10 @@
+package net.noparking.projects.view.ImageEditionView.canvas.modes.utl
+
+class DrawingModes {
+    companion object {
+        val NONE = -1
+        val PENCIL = 0
+        val POLYGON = 1
+        val ANNOTATIONS = 2
+    }
+}

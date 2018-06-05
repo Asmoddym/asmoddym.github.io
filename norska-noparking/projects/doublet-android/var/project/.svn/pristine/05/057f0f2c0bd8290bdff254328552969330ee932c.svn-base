@@ -1,0 +1,132 @@
+package net.noparking.projects.activity
+
+import android.graphics.Color
+import android.net.Uri
+import android.support.v7.app.AppCompatActivity
+import android.os.Bundle
+import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.view.Window
+import android.view.WindowManager
+import android.widget.PopupMenu
+import net.noparking.projects.R
+import net.noparking.projects.utl.Image
+import kotlinx.android.synthetic.main.activity_image_editing.*
+import net.noparking.projects.view.ImageEditionView.canvas.modes.utl.DrawingModes
+import petrov.kristiyan.colorpicker.ColorPicker
+import java.io.File
+
+class ImageEditionActivity : AppCompatActivity() {
+	private lateinit var _background: Image
+	private var _image_id: Long = 0
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+
+		requestWindowFeature(Window.FEATURE_NO_TITLE)
+		this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
+		if (intent.extras.containsKey("image_id")) {
+			_image_id = intent.extras["image_id"] as Long
+		}
+
+		setContentView(R.layout.activity_image_editing)
+
+		initBackground()
+		initControlPanel()
+	}
+
+	private fun initBackground() {
+		_background = Image(baseContext, null, contentResolver)
+		_background.uri = intent.extras["image_uri"] as Uri
+		_background.file = intent.extras["image_file"] as File
+		image_edition_imageeditionview.init(_image_id, this)
+		image_edition_imageeditionview.setBitmap(_background.getBitmap())
+	}
+
+	private fun initControlPanel() {
+
+		image_edition_imagebutton_control_polygon_edition.setBackgroundColor(Color.RED)
+
+		image_edition_imagebutton_control_color_picker.setBackgroundColor(Color.CYAN)
+
+		image_edition_imagebutton_control_clear_canvas.setOnClickListener {
+			image_edition_imagebutton_control_annotations_edition.setBackgroundColor(Color.TRANSPARENT)
+			val mode = image_edition_imageeditionview.getCanvas().setClearMode()
+			if (mode) {
+				image_edition_imagebutton_control_clear_canvas.setBackgroundColor(Color.RED)
+				image_edition_imagebutton_control_polygon_edition.setBackgroundColor(Color.TRANSPARENT)
+			} else {
+				image_edition_imagebutton_control_clear_canvas.setBackgroundColor(Color.TRANSPARENT)
+				image_edition_imagebutton_control_polygon_edition.setBackgroundColor(Color.RED)
+			}
+		}
+
+		image_edition_imagebutton_control_color_picker.setOnClickListener {
+			val colorPicker = ColorPicker(this)
+
+			colorPicker.setTitle(getString(R.string.choose_a_color))
+			colorPicker.setOnFastChooseColorListener(object : ColorPicker.OnFastChooseColorListener {
+				override fun setOnFastChooseColorListener(position: Int, color: Int) {
+					image_edition_imageeditionview.getCanvas().setColor(color)
+					image_edition_imagebutton_control_color_picker.setBackgroundColor(color)
+				}
+
+				override fun onCancel() {
+				}
+			}).show()
+		}
+
+		image_edition_imagebutton_control_annotations_edition.setOnClickListener {
+			image_edition_imageeditionview.getCanvas().setDrawingMode(DrawingModes.ANNOTATIONS)
+
+			image_edition_imagebutton_control_annotations_edition.setBackgroundColor(Color.RED)
+			image_edition_imagebutton_control_clear_canvas.setBackgroundColor(Color.TRANSPARENT)
+			image_edition_imagebutton_control_polygon_edition.setBackgroundColor(Color.TRANSPARENT)
+		}
+
+		image_edition_imagebutton_control_polygon_edition.setOnClickListener {
+			image_edition_imageeditionview.getCanvas().setDrawingMode(DrawingModes.POLYGON)
+
+			image_edition_imagebutton_control_annotations_edition.setBackgroundColor(Color.TRANSPARENT)
+			image_edition_imagebutton_control_clear_canvas.setBackgroundColor(Color.TRANSPARENT)
+			image_edition_imagebutton_control_polygon_edition.setBackgroundColor(Color.RED)
+		}
+
+//		image_edition_imagebutton_control_draw_options.setOnClickListener {
+//			val popup = PopupMenu(this, it)
+//			popup.inflate(R.menu.menu_image_edition_draw_options)
+//			popup.setOnMenuItemClickListener {
+//				image_edition_imageeditionview.getCanvas().setDrawingMode(
+//						when (it!!.itemId) {
+//							R.id.menu_image_edition_draw_options_polygons -> DrawingModes.POLYGON
+//							R.id.menu_image_edition_draw_options_pencil -> DrawingModes.PENCIL
+//							R.id.menu_image_edition_draw_options_annotations -> DrawingModes.ANNOTATIONS
+//							else -> DrawingModes.NONE
+//						}
+//				)
+//				true
+//			}
+//			popup.show()
+	}
+
+	override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+		super.onOptionsItemSelected(item)
+		if (item?.itemId == R.id.menu_image_edition_main_save_and_quit) {
+			finish()
+		}
+		return true
+	}
+
+	override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+		super.onCreateOptionsMenu(menu)
+		menuInflater.inflate(R.menu.menu_image_edition_main, menu)
+		return true
+	}
+
+	override fun onDestroy() {
+		image_edition_imageeditionview.getCanvas().destroy()
+		super.onDestroy()
+	}
+}

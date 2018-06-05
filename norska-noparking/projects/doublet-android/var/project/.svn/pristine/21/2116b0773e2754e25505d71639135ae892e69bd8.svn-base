@@ -1,0 +1,78 @@
+package net.noparking.projects.utl
+
+import android.app.AlertDialog
+import android.arch.lifecycle.Observer
+import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.layout_project_name_picker.view.*
+import net.noparking.projects.R
+import net.noparking.projects.database.project.Project
+import net.noparking.projects.database.project.ProjectsCollector
+
+class ProjectNamePicker(internal val activity: AppCompatActivity) {
+    private val _projects_list = ProjectsCollector().init(activity.baseContext).getAll()
+    private var _positive_action: ((String, Boolean) -> Unit)? = null
+    private val _view = activity.layoutInflater.inflate(R.layout.layout_project_name_picker, null)
+
+    init {
+        _projects_list.observe(activity, Observer {
+            initPicker()
+        })
+    }
+
+    fun setDefaultInput(s: String): ProjectNamePicker {
+        _view.layout_project_name_picker_input.text.replace(0, _view.layout_project_name_picker_input.text.length, s)
+        return this
+    }
+
+    fun setOnPositiveAction(f: (String, Boolean) -> Unit): ProjectNamePicker {
+        _positive_action = f
+        return this
+    }
+
+    private fun initPicker() {
+        _view.layout_project_name_picker_input.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                _view.layout_project_name_picker_name_already_taken.visibility = when (findProjectNameInList(s.toString(), _projects_list.value)) {
+                    true -> View.VISIBLE
+                    false -> View.INVISIBLE
+                }
+            }
+        })
+    }
+
+    fun show() {
+        val picker = AlertDialog.Builder(activity)
+        picker.setView(_view)
+                .setOnDismissListener {
+                    if (_view.parent != null) {
+                        (_view.parent as ViewGroup).removeView(_view)
+                    }
+                }
+                .setTitle(activity.getString(R.string.choose_a_project_name))
+                .setPositiveButton(activity.getString(R.string.ok), { _, _ ->
+                    if (_positive_action != null) {
+                        _positive_action?.invoke(_view.layout_project_name_picker_input.text.toString(),
+                                findProjectNameInList(_view.layout_project_name_picker_input.text.toString(), _projects_list.value))
+                    }
+                })
+                .setNegativeButton(activity.getString(R.string.cancel), { _, _ ->
+                })
+                .create()
+                .show()
+    }
+
+    private fun findProjectNameInList(name: String, list: List<Project>?): Boolean {
+        list?.forEach {
+            if (it.project_name == name) {
+                return true
+            }
+        }
+        return false
+    }
+}

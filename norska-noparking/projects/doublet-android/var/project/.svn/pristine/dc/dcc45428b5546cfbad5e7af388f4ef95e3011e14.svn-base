@@ -1,0 +1,23 @@
+package net.noparking.projects.utl
+
+import android.util.Log
+import java.io.File
+import java.security.PrivilegedAction
+
+class Directory(internal var root: File, internal var name: String) {
+    private lateinit var _path: File
+
+    init {
+        _path = File(root, name)
+    }
+
+    fun create() {
+        if (!_path.exists()) {
+            _path.mkdirs()
+        }
+    }
+
+    fun getPath(): File {
+        return _path
+    }
+}

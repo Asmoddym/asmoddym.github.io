@@ -1,0 +1,2249 @@
+<?php
+/*
+	opentime
+	$Author$
+	$URL$
+	$Revision$
+
+	Copyright (C) No Parking 2009 - 2018
+*/
+
+class Form_Filter {
+	public $attributes = array();
+	public $body;
+	public $title;
+	public $elements = array();
+	public $properties = array();
+
+	function __construct() {
+		$elements = func_get_args();
+		
+		if (count($elements) == 1 and is_array($elements[0])) {
+			foreach ($elements[0] as $element) {
+				$this->set_element($element);
+			}
+		} else {
+			foreach ($elements as $element) {
+				$this->set_element($element);
+			}
+		}
+	}
+
+	function __isset($element) {
+		return isset($this->elements[$element]);
+	}
+
+	function __get($element) {
+		return isset($this->elements[$element]) ? $this->elements[$element] : null;
+	}
+	
+	function place_into_session() {
+		foreach ($this->elements as $element => $value) {
+			$_SESSION['filtered_'.$element] = $value;
+		}
+	}
+
+	function reset_session() {
+		if (isset($_SESSION) and is_array($_SESSION)) {
+			foreach ($_SESSION as $key => $value) {
+				if (preg_match("/^filtered_.*/", $key)) {
+					unset($_SESSION[$key]);
+				}
+			}
+		}
+	}
+
+	function querystring() {
+		$strings = array();
+		foreach ($this->elements as $element => $value) {
+			if (isset($value) and (!empty($value) or $value === 0 or $value === "0")) {
+				if (is_array($value)) {
+					$value = implode(",", $value);
+				}
+				$strings[] = "filtered_".$element."=".$value;
+			}
+		}
+
+		return implode("&", $strings);
+	}
+
+	function select_properties() {
+		$properties = array();
+
+		foreach ($this->elements as $element => $value) {
+			if (isset($value) and $value != array("") and (!empty($value) or $value === 0)) {
+				$properties[$element] = $value;
+			}
+		}
+
+		return $properties;
+	}
+
+	function paidstatuses() {
+		$paidstatuses = array();
+		$paidstatuses['-1'] = $GLOBALS['txt_notpaid'];
+		$paidstatuses['0'] = $GLOBALS['txt_all'];
+		$paidstatuses['1'] = $GLOBALS['txt_paid'];
+
+		return $paidstatuses;
+	}
+
+	function personalrequestprints() {
+		$personalrequestprints = array();
+		$personalrequestprints['-1'] = $GLOBALS['txt_no'];
+		$personalrequestprints['0'] = $GLOBALS['txt_both'];
+		$personalrequestprints['1'] = $GLOBALS['txt_yes'];
+
+		return $personalrequestprints;
+	}
+
+	function personalrequeststatuses() {
+		$personalrequeststatuses = array();
+		$personalrequeststatuses['0'] = $GLOBALS['txt_tobetreated'];
+		$personalrequeststatuses['1'] = $GLOBALS['txt_all'];
+
+		return $personalrequeststatuses;
+	}
+
+	function requeststatuses() {
+		$requeststatuses = new Request_Statuses();
+		$requeststatuses->select();
+
+		return $requeststatuses->to_array_with_name();
+	}
+
+	function requestpriorities() {
+		$requestpriorities = new Request_Priorities();
+		$requestpriorities->select();
+
+		return $requestpriorities->to_array_with_name();
+	}
+
+	function customerarchives() {
+		return array(
+			'0' => __("without archives"),
+			'1' => __("with archives"),
+		);
+	}
+
+	function projectarchives() {
+		return array(
+			'0' => __("without archives"),
+			'1' => __("with archives"),
+		);
+	}
+
+	function userarchives() {
+		return array(
+			'-1' => $GLOBALS['txt_archived'],
+			'0' => $GLOBALS['txt_all'],
+			'1' => $GLOBALS['txt_present'],
+		);
+	}
+
+	function assignments() {
+		$assignments = array();
+		$assignments['-1'] = $GLOBALS['txt_unassigned'];
+		$assignments['0'] = $GLOBALS['txt_both'];
+		$assignments['1'] = $GLOBALS['txt_assigned'];
+
+		return $assignments;
+	}
+
+	function chargeplans() {
+		$chargeplans = array();
+		$chargeplans['-1'] = $GLOBALS['txt_without'];
+		$chargeplans['0'] = $GLOBALS['txt_withandwithout'];
+		$chargeplans['1'] = $GLOBALS['txt_with'];
+
+		return $chargeplans;
+	}
+
+	function projectstatuses() {
+		$projectstatuses = new Project_Statuses();
+		$projectstatuses->select();
+
+		return $projectstatuses->names("id");
+
+	}
+
+	function projectchildren() {
+		$projectchildren = array();
+		$projectchildren['-1'] = $GLOBALS['txt_without'];
+		$projectchildren['1'] = $GLOBALS['txt_with'];
+
+		return $projectchildren;
+	}
+
+	function estimates() {
+		$estimates = array();
+		$estimates['0'] = $GLOBALS['txt_withandwithout'];
+		$estimates['1'] = $GLOBALS['txt_with'];
+
+		return $estimates;
+	}
+
+	function set_element($element, $value = null) {
+		if (!isset($value)) {
+			if (isset($_SESSION['filtered_'.$element.'_id'])) {
+				$value = list_2_array(($_SESSION['filtered_'.$element.'_id']));
+				$value = clean_array_from_multiplecombobox($value);
+			} elseif (isset($_SESSION['filtered_'.$element])) {
+				if (is_array($_SESSION['filtered_'.$element])) {
+					$value = $_SESSION['filtered_'.$element];
+				} elseif (preg_match("/^[0-9]*,[0-9,]*[0-9]$/", $_SESSION['filtered_'.$element])) {
+					$value = list_2_array($_SESSION['filtered_'.$element]);
+				} else {
+					$value = (string)$_SESSION['filtered_'.$element];
+				}
+			}
+			
+			if (isset($_GET['filtered_'.$element.'_id'])) {
+				$value = list_2_array(($_GET['filtered_'.$element.'_id']));
+				$value = clean_array_from_multiplecombobox($value);
+			} elseif (isset($_GET['filtered_'.$element])) {
+				if (is_array($_GET['filtered_'.$element])) {
+					$value = $_GET['filtered_'.$element];
+				} elseif (preg_match("/^[0-9]*,[0-9,]*[0-9]$/", $_GET['filtered_'.$element])) {
+					$value = list_2_array($_GET['filtered_'.$element]);
+				} else {
+					$value = (string)$_GET['filtered_'.$element];
+				}
+			}
+			
+			if (isset($_POST['filter']) and $_POST['filter'] == "apply") {
+				$value = null;
+			}
+
+			if (isset($_POST['filtered_'.$element.'_id'])) {
+				$value = $_POST['filtered_'.$element.'_id'];
+				if (!is_array($value) and isset($_POST['filtered_'.$element.'_id']) and $_POST['filtered_'.$element.'_id'] != '--') {
+					$value = unserialize(urldecode($_POST['filtered_'.$element.'_id']));
+				}
+				$value = clean_array_from_multiplecombobox($value);
+			} elseif (isset($_POST['filtered_'.$element])) {
+				if (is_array($_POST['filtered_'.$element])) {
+					$value = $_POST['filtered_'.$element];
+				} elseif (in_array($element, array("salefigurestatus", "salefigurepaymentmode"))) {
+					if ($_POST['filtered_'.$element] == "--") {
+						$value = null;
+					} else {
+						$value = (int)$_POST['filtered_'.$element];
+					}
+				} else {
+					$value = (string)$_POST['filtered_'.$element];
+				}
+			}
+
+			if (in_array($element, array("start", "stop", "orderstart", "orderstop", "salefigurematuritydate", "salefigurepaymentdate"))) {
+				if (isset($_POST['filtered_'.$element])) {
+					if (is_array($_POST['filtered_'.$element])) {
+						if ((int)$_POST['filtered_'.$element]['d'] != 0 or (int)$_POST['filtered_'.$element]['m'] != 0 or (int)$_POST['filtered_'.$element]['Y'] != 0) {
+							$value = mktime(0, 0, 0, (int)$_POST['filtered_'.$element]['m'], (int)$_POST['filtered_'.$element]['d'], (int)$_POST['filtered_'.$element]['Y']);
+						} else {
+							$value = null;
+						}
+					} elseif (is_string($_POST['filtered_'.$element])) {
+						$value = (int)$_POST['filtered_'.$element];
+					}
+				} elseif (isset($_POST['filtered_'.$element.'day']) and isset($_POST['filtered_'.$element.'month']) and isset($_POST['filtered_'.$element.'year'])
+					and ($_POST['filtered_'.$element.'day'] !== "" or $_POST['filtered_'.$element.'month'] !== "" or $_POST['filtered_'.$element.'year'] !== "")) {
+					$value = mktime(0, 0, 0, (int)$_POST['filtered_'.$element.'month'], (int)$_POST['filtered_'.$element.'day'], (int)$_POST['filtered_'.$element.'year']);
+				}
+			}
+		}
+
+		if (is_array($value)) {
+			$value = clean_array_from_multiplecombobox($value);
+		}
+
+		$this->elements[$element] = $value;
+
+		if ($element == "requestname") {
+			$this->set_elements_requestoptions();
+		}
+	}
+
+	function set_elements_requestoptions() {
+		if ($GLOBALS['param']['requestoptions_inputstext']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_inputstext']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (isset($_GET['filtered_'.$name])) {
+					$this->elements[$name] = $_GET['filtered_'.$name];
+				} elseif (isset($_POST['filtered_'.$name])) {
+					$this->elements[$name] = $_POST['filtered_'.$name];
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_inputsnumber']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_inputsnumber']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (isset($_GET['filtered_'.$name])) {
+					$this->elements[$name] = $_GET['filtered_'.$name];
+				} elseif (isset($_POST['filtered_'.$name])) {
+					$this->elements[$name] = $_POST['filtered_'.$name];
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_textareas']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_textareas']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (isset($_GET['filtered_'.$name]) and $_GET['filtered_'.$name] != "") {
+					$this->elements[$name] = $_GET['filtered_'.$name];
+				} elseif (isset($_POST['filtered_'.$name]) and $_POST['filtered_'.$name] != "") {
+					$this->elements[$name] = $_POST['filtered_'.$name];
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selectsuser']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selectsuser']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (isset($_GET['filtered_'.$name]) and $_GET['filtered_'.$name] != "--") {
+					$this->elements[$name] = $_GET['filtered_'.$name];
+				} elseif (isset($_POST['filtered_'.$name]) and $_POST['filtered_'.$name] != "--") {
+					$this->elements[$name] = $_POST['filtered_'.$name];
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selects']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selects']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (isset($_GET['filtered_'.$name]) and $_GET['filtered_'.$name] != "--") {
+					$this->elements[$name] = $_GET['filtered_'.$name];
+				} elseif (isset($_POST['filtered_'.$name]) and $_POST['filtered_'.$name] != "--") {
+					$this->elements[$name] = $_POST['filtered_'.$name];
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_inputsdate']) {
+			$requestoptionsinputs = input_list_2_array($GLOBALS['param']['requestoptions_inputsdate']);
+
+			foreach ($requestoptionsinputs as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				foreach (array($_GET, $_POST) as $data) {
+					if (isset($data['filtered_'.$name.'day']) and isset($data['filtered_'.$name.'month']) and isset($data['filtered_'.$name.'year'])) {
+						$this->elements[$name] = mktime(0, 0, 0, (int)$data['filtered_'.$name.'month'], (int)$data['filtered_'.$name.'day'], (int)$data['filtered_'.$name.'year']);
+						break;
+					}
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selectsmulti']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selectsmulti']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				foreach (array($_GET, $_POST) as $data) {
+					if (isset($data['filtered_'.$name]) and $data['filtered_'.$name] != "--") {
+						$this->elements[$name] = $data['filtered_'.$name];
+						break;
+					}
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_reference_autre_demande'] > 0) {
+			foreach (array($_GET, $_POST) as $data) {
+				if (isset($data['filtered_requestoptions_reference_autre_demande']) and $data['filtered_requestoptions_reference_autre_demande'] != "--") {
+					$this->elements['requestoptions_reference_autre_demande'] = $data['filtered_requestoptions_reference_autre_demande'];
+					break;
+				}
+			}
+		}
+	}
+
+	function show() {
+		$this->construct();
+		
+		$helper = new Html_Helper("filter", $this->title, $this->body);
+		if (isset($this->attributes['class'])) {
+			$helper->attributes['class'] = $this->attributes['class'];
+		}
+		return $helper->show();
+	}
+
+	function result() {
+		$result = "";
+
+		foreach ($this->elements as $element_key => $element_selected) {
+			$callback = "result_".$element_key;
+			if (is_callable(array($this, $callback))) {
+				$result .= $this->$callback();
+			}
+		}
+
+		if (array_key_exists("requestname", $this->elements)) {
+			$result .= $this->result_requestoptions();
+		}
+
+		return $result;
+	}
+
+	function result_requestoptions() {
+		$result = "";
+
+		if ($GLOBALS['param']['requestoptions_inputstext']) {
+			$requestoptionstext = input_list_2_array($GLOBALS['param']['requestoptions_inputstext']);
+
+			foreach ($requestoptionstext as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (!empty($this->elements[$name])) {
+					$result .= Format::label($requestoption).":&nbsp;".$this->elements[$name]."<br />";
+				}
+			}
+		}
+		if ($GLOBALS['param']['requestoptions_inputsnumber']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_inputsnumber']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (!empty($this->elements[$name])) {
+					$result .= Format::label($requestoption).":&nbsp;".$this->elements[$name]."<br />";
+				}
+			}
+		}
+		if ($GLOBALS['param']['requestoptions_textareas']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_textareas']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (!empty($this->elements[$name])) {
+					$result .= Format::label($requestoption).":&nbsp;".$this->elements[$name]."<br />";
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selectsuser']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selectsuser']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (!empty($this->elements[$name])) {
+					$user = new User($this->elements[$name]);
+					$result .= Format::label($requestoption).":&nbsp;".$user->name()."<br />";
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selects']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selects']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				$list_options = new Request_List_Options($requestoption);
+				$list_options->select();
+				$list_names = array('--' => "--") + $list_options->to_array_with_names();
+
+				if (!empty($this->elements[$name])) {
+					$result .= Format::label($requestoption).":&nbsp;".$list_names[$this->elements[$name]]."<br />";
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_inputsdate']) {
+			$requestoptionsinputsdate = input_list_2_array($GLOBALS['param']['requestoptions_inputsdate']);
+
+			foreach ($requestoptionsinputsdate as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (!empty($this->elements[$name])) {
+					$result .= Format::label($requestoption).":&nbsp;".Format::date($this->elements[$name])."<br />";
+				}
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selectsmulti']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selectsmulti']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+
+				if (!empty($this->elements[$name])) {
+					$list_options = new Request_List_Options($requestoption);
+					$list_options->select();
+					$list_names = $list_options->to_array_with_names();
+					$result .= Format::label($requestoption).":&nbsp;".$list_names[$this->elements[$name]]."<br />";
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	function result_requeststatus() {
+		$result = "";
+
+		if (is_array($this->elements['requeststatus']) and count($this->elements['requeststatus'])) {
+			$requeststatuses = $this->requeststatuses();
+			$result = Format::label($GLOBALS['txt_status']).":&nbsp;";
+			foreach ($this->elements['requeststatus'] as $requestatus_id) {
+				$result .= $requeststatuses[(int)$requestatus_id].", ";
+			}
+			$result = substr($result, 0, -2)."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_requestpriority() {
+		$result = "";
+
+		if (is_numeric($this->elements['requestpriority'])) {
+			$requestpriorities = $this->requestpriorities();
+			$result = Format::label($GLOBALS['txt_priority']).":&nbsp;".$requestpriorities[(int)$this->elements['requestpriority']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_requestname() {
+		$result = "";
+
+		if (!empty($this->elements['requestname'])) {
+			$result = Format::label($GLOBALS['txt_name']).":&nbsp;".$this->elements['requestname']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactfullname() {
+		$result = "";
+
+		if (!empty($this->elements['contactfullname'])) {
+			$result = Format::label($GLOBALS['txt_contact']).":&nbsp;".$this->elements['contactfullname']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contact() {
+		$result = "";
+
+		if ($this->elements['contact'] and !is_array($this->elements['contact'])) {
+			$this->elements['contact'] = array($this->elements['contact']);
+		}
+
+		if (is_array($this->elements['contact']) and $this->elements['contact'] != array('') and $this->elements['contact'] != array('--')) {
+    		$contacts = new Contacts();
+    		$contacts->id = $this->elements['contact'];
+    		$contacts->select();
+    		$contacts_name = $contacts->fullnames();
+    		foreach ($contacts_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['txt_contacts']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_contactname() {
+		$result = "";
+
+		if (!empty($this->elements['contactname'])) {
+			$result = Format::label($GLOBALS['txt_name']).":&nbsp;".$this->elements['contactname']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactcompany() {
+		$result = "";
+
+		if (!empty($this->elements['contactcompany'])) {
+			$result = Format::label($GLOBALS['txt_company']).":&nbsp;".$this->elements['contactcompany']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactemail() {
+		$result = "";
+
+		if (!empty($this->elements['contactemail'])) {
+			$result = Format::label($GLOBALS['txt_email']).":&nbsp;".$this->elements['contactemail']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactcomment() {
+		$result = "";
+
+		if (!empty($this->elements['contactcomment'])) {
+			$result = Format::label($GLOBALS['txt_comment']).":&nbsp;".$this->elements['contactcomment']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactnumber() {
+		$result = "";
+
+		if (!empty($this->elements['contactnumber'])) {
+			$result = Format::label($GLOBALS['txt_number']).":&nbsp;".$this->elements['contactnumber']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactcategory() {
+		$result = "";
+
+		if ($this->elements['contactcategory'] and !is_array($this->elements['contactcategory'])) {
+			$this->elements['contactcategory'] = array($this->elements['contactcategory']);
+		}
+
+		if (is_array($this->elements['contactcategory']) and $this->elements['contactcategory'] != array('') and $this->elements['contactcategory'] != array('--')) {
+    		$categories = new Contact_Categories();
+			$categories->id = $this->elements['contactcategory'];
+    		$categories->select();
+    		$result = implode(", ", $categories->to_array_with_name());
+
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['txt_category']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_contactcountry() {
+		$result = "";
+
+		if (is_numeric($this->elements['contactcountry']) and $this->elements['contactcountry'] > 0) {
+			$country = new Contact_Country($this->elements['contactcountry']);
+			$result = Format::label($GLOBALS['txt_country']).":&nbsp;".$country->name()."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactzip() {
+		$result = "";
+
+		if (!empty($this->elements['contactzip'])) {
+			$result = Format::label($GLOBALS['txt_zip']).":&nbsp;".$this->elements['contactzip']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactfunction() {
+		$result = "";
+
+		if (is_numeric($this->elements['contactfunction']) and $this->elements['contactfunction'] > 0) {
+			$function = new Contact_function($this->elements['contactfunction']);
+			$result = Format::label($GLOBALS['txt_function']).":&nbsp;".$function->name()."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_contactservice() {
+		$result = "";
+
+		if (is_numeric($this->elements['contactservice']) and $this->elements['contactservice'] > 0) {
+			$service = new Contact_service($this->elements['contactservice']);
+			$result = Format::label($GLOBALS['txt_service']).":&nbsp;".$service->name()."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_estimate() {
+		$result = "";
+
+		if (is_numeric($this->elements['estimate'])) {
+			$estimates = $this->estimates();
+			$result = Format::label($GLOBALS['txt_estimates']).":&nbsp;".$estimates[(int)$this->elements['estimate']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_number() {
+		$result = "";
+
+		if (!empty($this->elements['number'])) {
+			$result = Format::label($GLOBALS['txt_number']).":&nbsp;".$this->elements['number']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_salefigurenumber() {
+		$result = "";
+
+		if (!empty($this->elements['salefigurenumber'])) {
+			$result = Format::label($GLOBALS['txt_number']).":&nbsp;".$this->elements['salefigurenumber']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_salefigurematurity() {
+		if (!empty($this->elements['salefigurematurity']) and isset($GLOBALS['array_salefigure_maturity'][$this->elements['salefigurematurity']])) {
+			return Format::label(__("maturity")).":&nbsp;".$GLOBALS['array_salefigure_maturity'][$this->elements['salefigurematurity']]."<br />";
+		} else {
+			return "";
+		}
+	}
+
+	function result_salefigurematuritydate() {
+		if (!empty($this->elements['salefigurematuritydate']) and is_numeric($this->elements['salefigurematuritydate'])) {
+			return Format::label(__("maturity date")).":&nbsp;".Format::date($this->elements['salefigurematuritydate'])."<br />";
+		} else {
+			return "";
+		}
+	}
+	
+	function result_salefigurestatus() {
+		if (!empty($this->elements['salefigurestatus']) and isset($GLOBALS['array_salefigure_status'][$this->elements['salefigurestatus']])) {
+			return Format::label(__("status")).":&nbsp;".$GLOBALS['array_salefigure_status'][$this->elements['salefigurestatus']]."<br />";
+		} else {
+			return "";
+		}
+	}
+
+	function result_salefigurepaymentdate() {
+		if (!empty($this->elements['salefigurepaymentdate']) and is_numeric($this->elements['salefigurepaymentdate'])) {
+			return Format::label(__("payment date")).":&nbsp;".Format::date($this->elements['salefigurepaymentdate'])."<br />";
+		} else {
+			return "";
+		}
+	}
+	
+	function result_salefigurepaymentmode() {
+		if (!empty($this->elements['salefigurepaymentmode']) and isset($GLOBALS['array_salefigure_paymentmode'][$this->elements['salefigurepaymentmode']])) {
+			return Format::label(__("payment mode")).":&nbsp;".$GLOBALS['array_salefigure_paymentmode'][$this->elements['salefigurepaymentmode']]."<br />";
+		} else {
+			return "";
+		}
+	}
+	
+	function result_purchasenumber() {
+		$result = "";
+
+		if (!empty($this->elements['purchasenumber'])) {
+			$result = Format::label($GLOBALS['txt_number']).":&nbsp;".$this->elements['purchasenumber']."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_company() {
+		$result = "";
+		$companies = new Companies();
+		$companies->select();
+		$companies_names = $companies->names();
+
+		if (is_array($this->elements['company'])) {
+			$results = array();
+			foreach ($this->elements['company'] as $company_id) {
+				$results[] = $companies_names[$company_id];
+			}
+			$result = implode(", ", $results);
+		}
+		if (!empty($result)) {
+			$result = Format::label($GLOBALS['txt_companies']).":&nbsp;".$result."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_stop() {
+		$result = "";
+
+		if (is_numeric($this->elements['stop'])) {
+			$result = Format::label($GLOBALS['txt_dayend']).":&nbsp;".date("d/m/Y", $this->elements['stop'])."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_start() {
+		$result = "";
+
+		if (is_numeric($this->elements['start'])) {
+			$result = Format::label($GLOBALS['txt_daystart']).":&nbsp;".date("d/m/Y", $this->elements['start'])."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_date() {
+		$result = "";
+
+		if (is_numeric($this->elements['date'])) {
+			$result = Format::label($GLOBALS['txt_day']).":&nbsp;".date("d/m/Y", $this->elements['date'])."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_orderstop() {
+		$result = "";
+
+		if (is_numeric($this->elements['orderstop'])) {
+			$result = Format::label(__("order end")).":&nbsp;".date("d/m/Y", $this->elements['orderstop'])."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_orderstart() {
+		$result = "";
+
+		if (is_numeric($this->elements['orderstart'])) {
+			$result = Format::label(__("order start")).":&nbsp;".date("d/m/Y", $this->elements['orderstart'])."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_projectstatus() {
+		$result = "";
+
+		if (is_numeric($this->elements['projectstatus'])) {
+			$projectstatuses = $this->projectstatuses();
+			$result = Format::label($GLOBALS['txt_status']).":&nbsp;".$projectstatuses[(int)$this->elements['projectstatus']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_projectresponsible() {
+		$result = "";
+
+		if ($this->elements['projectresponsible'] and !is_array($this->elements['projectresponsible'])) {
+			$this->elements['projectresponsible'] = array($this->elements['projectresponsible']);
+		}
+
+		if (is_array($this->elements['projectresponsible']) and $this->elements['projectresponsible'] != array('') and $this->elements['projectresponsible'] != array('--')) {
+    		$users = new Users();
+    		$users->select(array('id' => $this->elements['projectresponsible']));
+    		$users_name = $users->to_array_with_name();
+    		foreach ($users_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['txt_responsible']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_projectchild() {
+		$result = "";
+
+		if (is_numeric($this->elements['projectchild'])) {
+			$projectchildren = $this->projectchildren();
+			$result = Format::label($GLOBALS['param']['levels_2']).":&nbsp;".$projectchildren[(int)$this->elements['projectchild']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_personal() {
+		$result = "";
+
+		if (is_numeric($this->elements['personal'])) {
+			$personals = new Personals();
+			$personals->id = $this->elements['personal'];
+			$personals->select();
+			$result = Format::label(__("absence")).":&nbsp;".implode(", ", $personals->to_array_with_name())."<br />";
+		}
+
+		return $result;
+	}
+	
+	function result_personalrequestprint() {
+		$result = "";
+
+		if (is_numeric($this->elements['personalrequestprint'])) {
+			$personalrequestprints = $this->personalrequestprints();
+			$result = Format::label($GLOBALS['txt_printed']).":&nbsp;".$personalrequestprints[(int)$this->elements['personalrequestprint']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_personalrequeststatus() {
+		$result = "";
+
+		if (is_numeric($this->elements['personalrequeststatus'])) {
+			$personalrequeststatuses = $this->personalrequeststatuses();
+			$result = Format::label($GLOBALS['txt_status']).":&nbsp;".$personalrequeststatuses[(int)$this->elements['personalrequeststatus']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_personalrequesttype() {
+		$result = "";
+
+		if (is_array($this->elements['personalrequesttype']) and count($this->elements['personalrequesttype'])) {
+			$personals = new Personals();
+			$personals->id = $this->elements['personalrequesttype'];
+			$personals->select();
+			$result = Format::label($GLOBALS['txt_type']).":&nbsp;".implode(", ", $personals->to_array_with_name())."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_paidstatus() {
+		$result = "";
+
+		if (is_numeric($this->elements['paidstatus'])) {
+			$paidstatuses = $this->paidstatuses();
+			$result = Format::label($GLOBALS['txt_payment']).":&nbsp;".$paidstatuses[(int)$this->elements['paidstatus']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_assignment() {
+		$result = "";
+
+		if (is_numeric($this->elements['assignment'])) {
+			$assignments = $this->assignments();
+			$result = Format::label($GLOBALS['txt_assignment']).":&nbsp;".$assignments[(int)$this->elements['assignment']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_chargeplan() {
+		$result = "";
+
+		if (is_numeric($this->elements['chargeplan'])) {
+			$chargeplans = $this->chargeplans();
+			$result = Format::label($GLOBALS['txt_chargeplan']).":&nbsp;".$chargeplans[(int)$this->elements['chargeplan']]."<br />";
+		}
+
+		return $result;
+	}
+
+	function result_customer() {
+		$result = "";
+
+		if ($this->elements['customer'] and !is_array($this->elements['customer'])) {
+			$this->elements['customer'] = array($this->elements['customer']);
+		}
+
+		if (is_array($this->elements['customer']) and $this->elements['customer'] != array('') and $this->elements['customer'] != array('--')) {
+    		$customers = new Customers();
+    		$customers->id = $this->elements['customer'];
+    		$customers->select();
+    		$customers_name = $customers->to_array_with_name();
+    		foreach ($customers_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['param']['levels_0']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_project() {
+		$result = "";
+
+		if ($this->elements['project'] and !is_array($this->elements['project'])) {
+			$this->elements['project'] = array($this->elements['project']);
+		}
+
+		if (is_array($this->elements['project']) and $this->elements['project'] != array('') and $this->elements['project'] != array('--')) {
+    		$projects = new Projects_Collector();
+    		$projects->id = $this->elements['project'];
+    		$projects->select();
+    		$projects_name = $projects->fullnames();
+    		foreach ($projects_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['param']['levels_1']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_user() {
+		$result = "";
+
+		if ($this->elements['user'] and !is_array($this->elements['user'])) {
+			$this->elements['user'] = array($this->elements['user']);
+		}
+
+		if (is_array($this->elements['user']) and $this->elements['user'] != array('') and $this->elements['user'] != array('--')) {
+    		$users = new Users();
+    		$users->select(array('id' => $this->elements['user']));
+    		$users_name = $users->to_array_with_name();
+    		foreach ($users_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['param']['users']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_users() {
+		$result = "";
+
+		if (is_array($this->elements['users']) and $this->elements['users'] != array('') and $this->elements['users'] != array('--')) {
+    		$users = new Users();
+    		$users->select(array('id' => $this->elements['users']));
+    		$users_name = $users->to_array_with_name();
+    		foreach ($users_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['param']['users']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+	
+	function result_customerarchive() {
+		$result = "";
+		if (is_numeric($this->elements['customerarchive'])) {
+			$customerarchives = $this->customerarchives();
+			$result = Format::label($GLOBALS['param']['levels_0']).":&nbsp;".$customerarchives[(int)$this->elements['customerarchive']]."<br />";
+		}
+		return $result;
+	}
+
+	function result_projectarchive() {
+		$result = "";
+		if (is_numeric($this->elements['projectarchive'])) {
+			$projectarchives = $this->projectarchives();
+			$result = Format::label($GLOBALS['param']['levels_1']).":&nbsp;".$projectarchives[(int)$this->elements['projectarchive']]."<br />";
+		}
+		return $result;
+	}
+
+	function result_userarchive() {
+		$result = "";
+		if (is_numeric($this->elements['userarchive'])) {
+			$userarchives = $this->userarchives();
+			$result = Format::label($GLOBALS['param']['users']).":&nbsp;".$userarchives[(int)$this->elements['userarchive']]."<br />";
+		}
+		return $result;
+	}
+
+	function result_task_id() {
+		$result = "";
+
+		if ($this->elements['task_id'] and !is_array($this->elements['task_id'])) {
+			$this->elements['task_id'] = array($this->elements['task_id']);
+		}
+
+		if (is_array($this->elements['task_id']) and $this->elements['task_id'] != array('') and $this->elements['task_id'] != array('--')) {
+    	 $tasks = new Tasks();
+    	 $tasks->id = $this->elements['task_id'];
+    	 $tasks->select();
+
+		   $tasks_name = $tasks->to_array_with_name();
+    		foreach ($tasks_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['param']['task']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_userlink() {
+		$result = "";
+
+		if ($this->elements['userlink'] and !is_array($this->elements['userlink'])) {
+			$this->elements['userlink'] = array($this->elements['userlink']);
+		}
+
+		if (is_array($this->elements['userlink']) and $this->elements['userlink'] != array('') and $this->elements['userlink'] != array('--')) {
+			$links = new User_Links();
+			$links->id = $this->elements['userlink'];
+			$links->set_order("name", "ASC");
+			$links->select();
+
+			$links_name = $links->to_array_with_name();
+	    	foreach ($links_name as $name) {
+	    		$result .= $name." ";
+	    	}
+	    	if (!empty($result)) {
+	    		$result = trim(Format::label($GLOBALS['param']['user_link']).":&nbsp;".$result)."<br />";
+	    	}
+		}
+
+		return $result;
+	}
+	
+	function result_hourlink() {
+		$result = "";
+	
+		if ($this->elements['hourlink'] and !is_array($this->elements['hourlink'])) {
+			$this->elements['hourlink'] = array($this->elements['hourlink']);
+		}
+	
+		if (is_array($this->elements['hourlink']) and $this->elements['hourlink'] != array('') and $this->elements['hourlink'] != array('--')) {
+			$links = new Hour_Links();
+			$links->id = $this->elements['hourlink'];
+			$links->set_order("name", "ASC");
+			$links->select();
+	
+			$links_name = $links->to_array_with_name();
+			foreach ($links_name as $name) {
+				$result .= $name." ";
+			}
+			if (!empty($result)) {
+				$result = trim(Format::label($GLOBALS['param']['hour_link']).":&nbsp;".$result)."<br />";
+			}
+		}
+	
+		return $result;
+	}
+
+	function result_service() {
+		if ($this->elements['service'] and !is_array($this->elements['service'])) {
+			$this->elements['service'] = array($this->elements['service']);
+		}
+
+		if (is_array($this->elements['service']) and $this->elements['service'] != array('') and $this->elements['service'] != array('--')) {
+			$string = join(" ", $this->elements['service']);
+			if (!empty($string)) {
+				return Format::label($GLOBALS['txt_service']).":&nbsp;".$string."<br />";
+			}
+		}
+
+		return "";
+	}
+	
+	function result_direction() {
+		if ($this->elements['direction'] and !is_array($this->elements['direction'])) {
+			$this->elements['direction'] = array($this->elements['direction']);
+		}
+
+		if (is_array($this->elements['direction']) and $this->elements['direction'] != array('') and $this->elements['direction'] != array('--')) {
+			$string = join(" ", $this->elements['direction']);
+			if (!empty($string)) {
+				return Format::label($GLOBALS['txt_direction']).":&nbsp;".$string."<br />";
+			}
+		}
+
+		return "";
+	}
+	
+	function result_expensesubject() {
+		$result = "";
+
+		if ($this->elements['expensesubject'] and !is_array($this->elements['expensesubject'])) {
+			$this->elements['expensesubject'] = array($this->elements['expensesubject']);
+		}
+
+		if (is_array($this->elements['expensesubject']) and $this->elements['expensesubject'] != array('') and $this->elements['expensesubject'] != array('--')) {
+    	 $subjects = new Expense_Subjects();
+		   $subjects->id = $this->elements['expensesubject'];
+		   $subjects->select();
+		   $subjects_name = $subjects->to_array_with_name();
+    		foreach ($subjects_name as $name) {
+    			$result .= $name." ";
+    		}
+    		if (!empty($result)) {
+    			$result = trim(Format::label($GLOBALS['txt_type']).":&nbsp;".$result)."<br />";
+    		}
+		}
+
+		return $result;
+	}
+
+	function result_invoicelink() {
+		$result = "";
+
+		if ($this->elements['invoicelink'] and !is_array($this->elements['invoicelink'])) {
+			$this->elements['invoicelink'] = array($this->elements['invoicelink']);
+		}
+
+		if (is_array($this->elements['invoicelink']) and $this->elements['invoicelink'] != array('') and $this->elements['invoicelink'] != array('--')) {
+			$subjects = new Invoice_Links();
+			$subjects->id = $this->elements['invoicelink'];
+			$subjects->select();
+			$subjects_name = $subjects->names();
+			foreach ($subjects_name as $name) {
+				$result .= $name." ";
+			}
+			if (!empty($result)) {
+				$result = trim(Format::label($GLOBALS['param']['invoice_link']).":&nbsp;".$result)."<br />";
+			}
+		}
+
+		return $result;
+	}
+	
+	function result_projectlink() {
+		$result = "";
+
+		if ($this->elements['projectlink'] and !is_array($this->elements['projectlink'])) {
+			$this->elements['projectlink'] = array($this->elements['projectlink']);
+		}
+		if (!empty($this->elements['projectlink']) and is_array($this->elements['projectlink']) and $this->elements['projectlink'] != array('') and $this->elements['projectlink'] != array('--')) {
+			$subject = new Project_Link();
+			if ($subject->load((int)$this->elements['projectlink'][0])) {
+				$result .= $subject->name." ";
+			}
+			if (!empty($result)) {
+				$result = trim(Format::label($GLOBALS['param']['level_1_link']).":&nbsp;".$result)."<br />";
+			}
+		}
+		return $result;
+	}
+
+	function construct() {
+		$this->construct_title();
+		$this->construct_body();
+	}
+
+	function construct_title() {
+		$this->title = $GLOBALS['status_filteron']." ";
+
+		$vocabulary = array();
+		$vocabulary['start'] = $GLOBALS['txt_daystart'];
+		$vocabulary['stop'] = $GLOBALS['txt_dayend'];
+		$vocabulary['company'] = $GLOBALS['txt_companies'];
+		$vocabulary['customer'] = $GLOBALS['param']['levels_0'];
+		$vocabulary['project'] = $GLOBALS['param']['levels_1'];
+		$vocabulary['user'] = $GLOBALS['param']['users'];
+		$vocabulary['date'] = $GLOBALS['txt_date'];
+		$vocabulary['assignment'] = $GLOBALS['txt_assignment'];
+		$vocabulary['projectchlid'] = $GLOBALS['param']['levels_2'];
+
+		foreach ($this->elements as $elements_key => $elements_selected) {
+			if (isset($vocabulary[$elements_key])) {
+				$this->title .= $vocabulary[$elements_key].", ";
+			}
+		}
+
+		$this->title = preg_replace("/, $/", "", $this->title);
+	}
+
+	function construct_id() {
+		$id = "form";
+		foreach ($this->elements as $elements_key => $elements_selected) {
+			$id .= "_".$elements_key;
+		}
+		$id .= "_filter";
+
+		return $id;
+	}
+
+	function construct_onsubmit() {
+		$onsubmit = "";
+		$onsubmitables = array("company", "customer", "project", "user");
+
+		foreach ($onsubmitables as $key => $onsubmitable) {
+			if (isset($this->properties[$onsubmitable.'_select']) and $this->properties[$onsubmitable.'_select'] == 1) {
+				unset($onsubmitables[$key]);
+			}
+		}
+
+		foreach ($this->elements as $elements_key => $elements_selected) {
+			if (in_array($elements_key, $onsubmitables)) {
+				$onsubmit .= "selectmultiple(elements['filtered_".$elements_key."_id[]']); ";
+			}
+		}
+
+		return trim($onsubmit);
+	}
+
+	function construct_grid_date() {
+		$grid = array();
+
+		$grid['date_0'][] = show_label("filtered_dateday", $GLOBALS['txt_date'].":&nbsp;");
+		$input_date = new Html_Input_Date("filtered_date", $this->elements['date']);
+		$grid['date_1'][] = $input_date->input();
+
+		return $grid;
+	}
+
+	function construct_grid_start() {
+		$grid = array();
+
+		$grid['start_0'][] = show_label("filtered_startday", $GLOBALS['txt_daystart'].":&nbsp;");
+		$input_date = new Html_Input_Date("filtered_start", $this->elements['start']);
+		$grid['start_1'][] =  $input_date->input();
+
+		return $grid;
+	}
+
+	function construct_grid_stop() {
+		$grid = array();
+
+		$grid['stop_0'][] = show_label("filtered_stop", $GLOBALS['txt_dayend'].":&nbsp;");
+		$input_date = new Html_Input_Date("filtered_stop", $this->elements['stop']);
+		$grid['stop_1'][] =  $input_date->input();
+
+		return $grid;
+	}
+
+	function construct_grid_orderstart() {
+		$grid = array();
+
+		$grid['orderstart_0'][] = show_label("filtered_orderstart", __("order start").":&nbsp;");
+		$input_date = new Html_Input_Date("filtered_orderstart", $this->elements['orderstart']);
+		$grid['orderstart_1'][] =  $input_date->input();
+
+		return $grid;
+	}
+
+	function construct_grid_orderstop() {
+		$grid = array();
+
+		$grid['orderstop_0'][] = show_label("filtered_orderstop", __("order end").":&nbsp;");
+		$input_date = new Html_Input_Date("filtered_orderstop", $this->elements['orderstop']);
+		$grid['orderstop_1'][] =  $input_date->input();
+
+		return $grid;
+	}
+
+	function construct_grid_projectstatus() {
+		$grid = array();
+
+		$projectstatuses = array('--' => "--") + $this->projectstatuses();
+		$select = new Html_Select("filtered_projectstatus", $projectstatuses, $this->elements['projectstatus']);
+		$select->properties['separator'] = " ";
+		$grid['projectstatus_0'][] = $select->label($GLOBALS['txt_status'].":&nbsp;");
+		$grid['projectstatus_1'][] = $select->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_projectlink() {
+		$grid = array();
+		
+		$projectlinks = new Project_Links();
+		$projectlinks->select();
+		$projectlinks = array('--' => '--') + $projectlinks->to_array_with_name();
+		
+		if (is_array($this->elements['projectlink'])) {
+			$projectlink_id = isset($this->elements['projectlink'][0]) ? (int)$this->elements['projectlink'][0] : 0;
+		} else {
+			$projectlink_id = (int)$this->elements['projectlink'];
+		}
+
+
+		$input = new Html_Select("filtered_projectlink[]", $projectlinks, $projectlink_id);
+		$grid['projectlink_0'][] = $input->label($GLOBALS['param']['level_1_link']);
+		$grid['projectlink_1'][] = $input->selectbox();
+
+		return $grid;
+	}
+	
+	function construct_grid_projectresponsible() {
+		$grid = array();
+		$properties = array();
+		if (isset($this->attributes['user_id'])) {
+			$properties['user_id'] = $this->attributes['user_id'];
+		}
+		if (isset($this->attributes['user_access'])) {
+			$properties['user_access'] = $this->attributes['user_access'];
+		}
+		$users = new Users();
+		$users->select($properties);
+		$users_name = array('--' => "--") + $users->to_array_with_name();
+
+		if (is_array($this->elements['projectresponsible'])) {
+			$user_id = reset($this->elements['projectresponsible']);
+		} else {
+			$user_id = (int)$this->elements['projectresponsible'];
+		}
+		$input = new Html_Select("filtered_projectresponsible_id[]", $users_name, $user_id);
+
+		$grid['user_0'][] = $input->label($GLOBALS['txt_responsible']);
+		$grid['user_1'][] = $input->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_projectchild() {
+		$grid = array();
+
+		$projectchildren = $this->projectchildren();
+		$projectchild = 1;
+		if (!empty($this->elements['projectchild'])) {
+			$projectchild = $this->elements['projectchild'];
+		}
+		$radio = new Html_Radio("filtered_projectchild", $projectchildren, $projectchild);
+		$radio->properties['separator'] = " ";
+		$grid['projectchild_0'][] = $radio->label($GLOBALS['param']['levels_2'].":&nbsp;");
+		$grid['projectchild_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_estimate() {
+		$grid = array();
+
+		$estimates = $this->estimates();
+		$radio = new Html_Radio("filtered_estimate", $estimates, $this->elements['estimate']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['estimate_0'][] = $radio->label($GLOBALS['txt_estimates'].":&nbsp;");
+		$grid['estimate_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_paidstatus() {
+		$grid = array();
+
+		$paidstatuses = $this->paidstatuses();
+		$radio = new Html_Radio("filtered_paidstatus", $paidstatuses, isset($this->elements['paidstatus']) ? (int)$this->elements['paidstatus'] : -1);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['paidstatus_0'][] = $radio->label($GLOBALS['txt_payment'].":&nbsp;");
+		$grid['paidstatus_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_number() {
+		$grid = array();
+
+		$text = new Html_Input("filtered_number", $this->elements['number']);
+		$grid['number_0'][] = $text->label($GLOBALS['txt_number'].":&nbsp;");
+		$grid['number_1'][] = $text->input();
+		
+		return $grid;
+	}
+
+	function construct_grid_salefigurenumber() {
+		$grid = array();
+
+		$text = new Html_Input("filtered_salefigurenumber", $this->elements['salefigurenumber']);
+		$grid['salefigurenumber_0'][] = $text->label($GLOBALS['txt_number'].":&nbsp;");
+		$grid['salefigurenumber_1'][] = $text->input();
+		
+		return $grid;
+	}
+
+	function construct_grid_salefigurematurity() {
+		$field = new Html_Select("filtered_salefigurematurity", array('--' => "--") + $GLOBALS['array_salefigure_maturity'], (int)$this->elements['salefigurematurity']);
+		return array(
+			'salefigurematurity_0' => array($field->label(__("maturity").":&nbsp;")),
+			'salefigurematurity_1' => array($field->selectbox()),
+		);
+	}
+	
+	function construct_grid_salefigurematuritydate() {
+		$field = new Html_Input_Date("filtered_salefigurematuritydate", $this->elements['salefigurematuritydate']);
+		return array(
+			'salefigurematuritydate_0' => array($field->label(__("maturity date").":&nbsp;")),
+			'salefigurematuritydate_1' => array($field->input()),
+		);
+	}
+	
+	function construct_grid_salefigurestatus() {
+		$field = new Html_Select("filtered_salefigurestatus", array('--' => "--") + $GLOBALS['array_salefigure_status'], (int)$this->elements['salefigurestatus']);
+		return array(
+			'salefigurestatus_0' => array($field->label(__("status").":&nbsp;")),
+			'salefigurestatus_1' => array($field->selectbox()),
+		);
+	}
+	
+	function construct_grid_salefigurepaymentdate() {
+		$field = new Html_Input_Date("filtered_salefigurepaymentdate", $this->elements['salefigurepaymentdate']);
+		return array(
+			'salefigurepaymentdate_0' => array($field->label(__("payment date").":&nbsp;")),
+			'salefigurepaymentdate_1' => array($field->input()),
+		);
+	}
+	
+	function construct_grid_salefigurepaymentmode() {
+		$field = new Html_Select("filtered_salefigurepaymentmode", array('--' => "--") + $GLOBALS['array_salefigure_paymentmode'], (int)$this->elements['salefigurepaymentmode']);
+		return array(
+			'salefigurepaymentmode_0' => array($field->label(__("payment mode").":&nbsp;")),
+			'salefigurepaymentmode_1' => array($field->selectbox()),
+		);
+	}
+	
+	function construct_grid_purchasenumber() {
+		$grid = array();
+
+		$text = new Html_Input("filtered_purchasenumber", $this->elements['purchasenumber']);
+		$grid['purchasenumber_0'][] = $text->label($GLOBALS['txt_number'].":&nbsp;");
+		$grid['purchasenumber_1'][] = $text->input();
+		
+		return $grid;
+	}
+
+	function construct_grid_requestname() {
+		$grid = array();
+
+		$field = new Html_Input("filtered_requestname", $this->elements['requestname']);
+		$field->properties['separator'] = " ";
+		$grid['requestname_0'][] = $field->label($GLOBALS['txt_name'].":&nbsp;");
+		$grid['requestname_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_personal() {
+		$grid = array();
+
+		$personals = new Personals();
+		$personals->select();
+		$input = new Html_Select("filtered_personal", $personals->names(), $this->elements['personal']);
+		$input->properties['tip'] = 1;
+		$input->properties['separator'] = " ";
+		$grid['personal_0'][] = $input->label(__("absence").":&nbsp;");
+		$grid['personal_1'][] = $input->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_personalrequestprint() {
+		$grid = array();
+
+		$personalrequestprints = $this->personalrequestprints();
+		$radio = new Html_Radio("filtered_personalrequestprint", $personalrequestprints, $this->elements['personalrequestprint']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['personalrequestprint_0'][] = $radio->label($GLOBALS['txt_printed'].":&nbsp;");
+		$grid['personalrequestprint_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_personalrequeststatus() {
+		$grid = array();
+
+		$personalrequeststatuses = $this->personalrequeststatuses();
+		$radio = new Html_Radio("filtered_personalrequeststatus", $personalrequeststatuses, $this->elements['personalrequeststatus']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['personalrequeststatus_0'][] = $radio->label($GLOBALS['txt_status'].":&nbsp;");
+		$grid['personalrequeststatus_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_personalrequesttype() {
+		$grid = array();
+
+		$personals = new Personals();
+		$personals->select();
+		$input = new Html_Select("filtered_personalrequesttype_id", $personals->to_array_with_name(), $this->elements['personalrequesttype']);
+		$input->properties['tip'] = 1;
+		$input->properties['separator'] = " ";
+		$grid['personalrequesttype_0'][] = $input->label($GLOBALS['txt_type'].":&nbsp;");
+		$grid['personalrequesttype_1'][] = $input->multiplecombobox();
+
+		return $grid;
+	}
+
+	function construct_grid_requeststatus() {
+		$grid = array();
+
+		$requeststatuses = array('--' => "--") + $this->requeststatuses();
+		$select = new Html_Select("filtered_requeststatus", $requeststatuses, $this->elements['requeststatus']);
+		$grid['requeststatus_0'][] = $select->label($GLOBALS['txt_status'].":&nbsp;");
+		$grid['requeststatus_1'][] = $select->multiplecombobox();
+
+		return $grid;
+	}
+
+	function construct_grid_requestpriority() {
+		$grid = array();
+
+		$requestpriorities = array('--' => "--") + $this->requestpriorities();
+		$select = new Html_Select("filtered_requestpriority", $requestpriorities, $this->elements['requestpriority']);
+		$select->properties['separator'] = " ";
+		$grid['requestpriority_0'][] = $select->label($GLOBALS['txt_priority'].":&nbsp;");
+		$grid['requestpriority_1'][] = $select->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_assignment() {
+		$grid = array();
+
+		$assignments = $this->assignments();
+		$radio = new Html_Radio("filtered_assignment", $assignments, $this->elements['assignment']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['assignment_0'][] = $radio->label($GLOBALS['txt_assignment'].":&nbsp;");
+		$grid['assignment_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_chargeplan() {
+		$grid = array();
+
+		$chargeplans = $this->chargeplans();
+		$radio = new Html_Radio("filtered_chargeplan", $chargeplans, $this->elements['chargeplan']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['chargeplan_0'][] = $radio->label($GLOBALS['txt_chargeplan'].":&nbsp;");
+		$grid['chargeplan_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_company() {
+		$grid = array();
+
+		if ($GLOBALS['param']['useroptions_company']) {
+			$companies = new Companies();
+			$companies->select();
+			if (isset($this->properties['company_select']) and $this->properties['company_select'] == 1) {
+				if (is_array($this->elements['company']) and count($this->elements['company']) > 0) {
+					$company = $this->elements['company'][0];
+				} else {
+					$company = null;
+				}
+
+				$input = new Html_Select("filtered_company_id[]", array('--' => "--") + $companies->names(), $company);
+
+				$grid['company_0'][] = $input->label($GLOBALS['txt_companies']);
+				$grid['company_1'][] = $input->selectbox();
+			}
+			else {
+				$input = new Html_Select("filtered_company_id", $companies->names(), $this->elements['company']);
+				$input->properties['tip'] = 1;
+				$grid['company_0'][] = $input->label($GLOBALS['txt_companies'].":&nbsp;");
+				$grid['company_1'][] = $input->multiplecombobox();
+			}
+		}
+
+		return $grid;
+	}
+
+	function construct_grid_user() {
+		$grid = array();
+		
+		$properties = array();
+		if (isset($this->attributes['user_id'])) {
+			$properties['user_id'] = $this->attributes['user_id'];
+		}
+		if (isset($this->attributes['user_access'])) {
+			$properties['user_access'] = $this->attributes['user_access'];
+		}
+		if (isset($this->properties['access'])) {
+			$properties['access'] = $this->properties['access'];
+		}
+		$users = Plugins::factory("Users");
+		$users->select($properties);
+		$users_name = array('--' => "--") + $users->to_array_with_name();
+
+		if (isset($this->properties['user_select']) and $this->properties['user_select'] == 1) {
+			if (is_array($this->elements['user']) and count($this->elements['user']) > 0) {
+				$user = $this->elements['user'][0];
+			} else {
+				$user = null;
+			}
+
+			$input = new Html_Select("filtered_user_id[]", $users_name, $user);
+
+			$grid['user_0'][] = $input->label($GLOBALS['param']['users']);
+			$grid['user_1'][] = $input->selectbox();
+		} else {
+			$input = new Html_Select("filtered_user_id", $users_name, $this->elements['user']);
+
+			$grid['user_0'][] = $input->label($GLOBALS['param']['users'])." ".$input->pickable();
+			$grid['user_1'][] = $input->multiplecombobox().$input->picker($users->groups());
+
+		}
+		
+		return $grid;
+	}
+
+	function construct_grid_users() {
+		$grid = array();
+		
+		$properties = array();
+		if (isset($this->attributes['user_id'])) {
+			$properties['user_id'] = $this->attributes['user_id'];
+		}
+		if (isset($this->attributes['user_access'])) {
+			$properties['user_access'] = $this->attributes['user_access'];
+		}
+		if (isset($this->properties['access'])) {
+			$properties['access'] = $this->properties['access'];
+		}
+		$users = Plugins::factory("Users");
+		$users->select($properties);
+		$users_name = array('--' => "--") + $users->to_array_with_name();
+
+		$input = new Html_Select("filtered_users_id", $users_name, $this->elements['users']);
+
+		$grid['users_0'][] = $input->label($GLOBALS['param']['users'])." ".$input->pickable();
+		$grid['users_1'][] = $input->multiplecombobox().$input->picker($users->groups());
+		
+		return $grid;
+	}
+
+	function construct_grid_task_id() {
+		$grid = array();
+
+		$tasks = new Tasks();
+		$tasks->select();
+		$tasks_name = array('--' => "--") + $tasks->to_array_with_name();
+
+		if (is_array($this->elements['task_id'])) {
+			$task_id = reset($this->elements['task_id']);
+		} else {
+			$task_id = (int)$this->elements['task_id'];
+		}
+
+		$select = new Html_Select("filtered_task_id[]", $tasks_name, $task_id);
+		$select->properties['separator'] = " ";
+		$grid['task_id_0'][] = $select->label($GLOBALS['param']['task'].":&nbsp;");
+		$grid['task_id_1'][] = $select->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_userlink() {
+		$grid = array();
+
+		if ($GLOBALS['param']['user_link'] != "") {
+			$links = new User_Links();
+			$links->set_order("name", "ASC");
+			$links->select();
+			$links_name = array('--' => "--") + $links->to_array_with_name();
+
+			if (is_array($this->elements['userlink'])) {
+				$userlink_id = reset($this->elements['userlink']);
+			} else {
+				$userlink_id = (int)$this->elements['userlink'];
+			}
+
+			$select = new Html_Select("filtered_userlink_id[]", $links_name, $userlink_id);
+			$select->properties['separator'] = " ";
+			$grid['userlink_0'][] = $select->label($GLOBALS['param']['user_link'].":&nbsp;");
+			$grid['userlink_1'][] = $select->selectbox();
+		}
+
+		return $grid;
+	}
+
+	function construct_grid_hourlink() {
+		$grid = array();
+
+		if ($GLOBALS['param']['hour_link'] != "") {
+			$links = new Hour_Links();
+			$links->set_order("name", "ASC");
+			$links->select();
+			$links_name = array('--' => "--") + $links->to_array_with_name();
+
+			if (is_array($this->elements['hourlink'])) {
+				$hourlink_id = reset($this->elements['hourlink']);
+			} else {
+				$hourlink_id = (int)$this->elements['hourlink'];
+			}
+
+			$select = new Html_Select("filtered_hourlink_id[]", $links_name, $hourlink_id);
+			$select->properties['separator'] = " ";
+			$grid['hourlink_0'][] = $select->label($GLOBALS['param']['hour_link'].":&nbsp;");
+			$grid['hourlink_1'][] = $select->selectbox();
+		}
+
+		return $grid;
+	}
+
+	function construct_grid_service() {
+		$grid = array();
+
+		if ($GLOBALS['param']['useroptions_service'] != "") {
+			$services = new User_Options();
+			$services->name = "service";
+			$services->select();
+			$services_name = array('--' => "--") + $services->values();
+
+			if (is_array($this->elements['service'])) {
+				$service = reset($this->elements['service']);
+			} else {
+				$service = $this->elements['service'];
+			}
+
+			$select = new Html_Select("filtered_service[]", $services_name, $service);
+			$select->properties['separator'] = " ";
+			$grid['service_0'][] = $select->label($GLOBALS['txt_service'].":&nbsp;");
+			$grid['service_1'][] = $select->selectbox();
+		}
+
+		return $grid;
+	}
+	
+	function construct_grid_direction() {
+		$grid = array();
+
+		if ($GLOBALS['param']['useroptions_direction'] != "") {
+			$directions = new User_Options();
+			$directions->name = "direction";
+			$directions->select();
+			$directions_name = array('--' => "--") + $directions->values();
+
+			if (is_array($this->elements['direction'])) {
+				$direction = reset($this->elements['direction']);
+			} else {
+				$direction = $this->elements['direction'];
+			}
+
+			$select = new Html_Select("filtered_direction[]", $directions_name, $direction);
+			$select->properties['separator'] = " ";
+			$grid['direction_0'][] = $select->label($GLOBALS['txt_direction'].":&nbsp;");
+			$grid['direction_1'][] = $select->selectbox();
+		}
+
+		return $grid;
+	}
+
+	function construct_grid_customerarchive() {
+		$radio = new Html_Radio("filtered_customerarchive", $this->customerarchives(), $this->elements['customerarchive']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		return array(
+			'customerarchive_0' => array($radio->label($GLOBALS['param']['levels_0'].":&nbsp;")),
+			'customerarchive_1' => array($radio->input()),
+		);
+	}
+	
+	function construct_grid_projectarchive() {
+		$radio = new Html_Radio("filtered_projectarchive", $this->projectarchives(), $this->elements['projectarchive']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		return array(
+			'projectarchive_0' => array($radio->label($GLOBALS['param']['levels_1'].":&nbsp;")),
+			'projectarchive_1' => array($radio->input()),
+		);
+	}
+	
+	function construct_grid_userarchive() {
+		$grid = array();
+
+		$radio = new Html_Radio("filtered_userarchive", $this->userarchives(), $this->elements['userarchive']);
+		$radio->properties['tip'] = 1;
+		$radio->properties['separator'] = " ";
+		$grid['userarchive_0'][] = $radio->label($GLOBALS['param']['users'].":&nbsp;");
+		$grid['userarchive_1'][] = $radio->input();
+
+		return $grid;
+	}
+
+	function construct_grid_project() {
+		$grid = array();
+
+		$project_id = 0;
+		$project_name = "";
+		$elements = array();
+		if ($this->elements['project']) {
+			$project = new Project(current($this->elements['project']));
+			$project->load();
+			$customer_id = $project->customer_id;
+			$project_id = $project->id;
+			$project_name = $project->name_in_full();
+			$elements = array($project_id => $project_name);
+		}
+
+		if (!$project_name and $project_id) {
+			$project = new Project();
+			$project->load($project_id);
+			$project_name = $project->name_in_full();
+			$elements = array($project_id => $project_name);
+		}
+
+		$content = "content=projects.ajax.php";
+		if (isset($this->attributes['status']) and $this->attributes['status'] == "all") {
+			$content .= "&status=all";
+		}
+		$input = new Html_Input_Ajax("filtered_project", link_content($content), $elements);
+
+		$grid['project_0'][] = $input->label($GLOBALS['param']['level_1']);
+		$grid['project_1'][] = $input->input();
+
+		return $grid;
+	}
+
+	function construct_grid_customer() {
+		$grid = array();
+
+		$parameters = "";
+		if (isset($this->attributes['user_access']) and isset($this->attributes['user_id'])) {
+			if ($this->attributes['user_access'] != "aa") {
+				$parameters .= "&user_id=".$this->attributes['user_id'];
+			}
+		}
+
+		$customers = new Customers();
+		if ($this->elements['customer']) {
+			$customers->id = $this->elements['customer'];
+			$customers->select();
+		}
+		$input = new Html_Select_Ajax("filtered_customer_id", link_content("content=customers.ajax.php".$parameters), $customers->to_array_with_name());
+
+		$grid['customer_0'][] = $input->label($GLOBALS['param']['level_0']);
+		$grid['customer_1'][] = $input->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactfullname() {
+		$field = new Html_Input("filtered_contactfullname", $this->elements['contactfullname']);
+
+		$grid['contactfullname_0'][] = $field->label($GLOBALS['txt_contact']);
+		$grid['contactfullname_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contact() {
+		$contacts = new Contacts();
+		if ($this->elements['contact']) {
+			$contacts->id = $this->elements['contact'];
+			$contacts->select();
+		}
+		$input = new Html_Select_Ajax("filtered_contact", link_content("content=contacts.ajax.php&action=search"), $contacts->fullnames());
+		
+		$grid['contact_0'][] = $input->label($GLOBALS['txt_contact']);
+		$grid['contact_1'][] = $input->input();
+		
+		return $grid;
+	}
+
+	function construct_grid_contactname() {
+		$field = new Html_Input("filtered_contactname", $this->elements['contactname']);
+
+		$grid['contactname_0'][] = $field->label($GLOBALS['txt_name']);
+		$grid['contactname_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactservice() {
+		$services = new Html_Helper_Gateway("Contact_Services");
+		$field = new Html_Select("filtered_contactservice", $services->elements_name(), $this->elements['contactservice']);
+
+		$grid['contactservice_0'][] = $field->label($GLOBALS['txt_service']);
+		$grid['contactservice_1'][] = $field->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_contactcompany() {
+		$field = new Html_Input("filtered_contactcompany", $this->elements['contactcompany']);
+
+		$grid['contactcompany_0'][] = $field->label($GLOBALS['txt_company']);
+		$grid['contactcompany_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactemail() {
+		$field = new Html_Input("filtered_contactemail", $this->elements['contactemail']);
+
+		$grid['contactemail_0'][] = $field->label($GLOBALS['txt_email']);
+		$grid['contactemail_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactfunction() {
+		$functions = new Html_Helper_Gateway("Contact_Functions");
+		$field = new Html_Select("filtered_contactfunction", $functions->elements_name(), $this->elements['contactfunction']);
+
+		$grid['contactfunction_0'][] = $field->label($GLOBALS['txt_function']);
+		$grid['contactfunction_1'][] = $field->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_contactcomment() {
+		$field = new Html_Input("filtered_contactcomment", $this->elements['contactcomment']);
+
+		$grid['contactcomment_0'][] = $field->label($GLOBALS['txt_comment']);
+		$grid['contactcomment_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactcategory() {
+		$elements = array();
+		if ($this->elements['contactcategory']) {
+			$contactcategories = new Contact_Categories();
+			$contactcategories->id = $this->elements['contactcategory'];
+			$contactcategories->select();
+			$elements = $contactcategories->to_array_with_name();
+		}
+
+		$content = "content=contactcategories.ajax.php";
+		$input = new Html_Select_Ajax("filtered_contactcategory", link_content($content), $elements);
+
+		$grid['contactcategory_0'][] = $input->label($GLOBALS['txt_category']);
+		$grid['contactcategory_1'][] = $input->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactnumber() {
+		$field = new Html_Input("filtered_contactnumber", $this->elements['contactnumber']);
+
+		$grid['contactnumber_0'][] = $field->label($GLOBALS['txt_number']);
+		$grid['contactnumber_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_contactcountry() {
+		$countries = new Html_Helper_Gateway("Contact_Countries");
+		$field = new Html_Select("filtered_contactcountry", $countries->elements_name(), $this->elements['contactcountry']);
+
+		$grid['contactcountry_0'][] = $field->label($GLOBALS['txt_country']);
+		$grid['contactcountry_1'][] = $field->selectbox();
+
+		return $grid;
+	}
+
+	function construct_grid_contactzip() {
+		$field = new Html_Input("filtered_contactzip", $this->elements['contactzip']);
+
+		$grid['contactzip_0'][] = $field->label($GLOBALS['txt_zip']);
+		$grid['contactzip_1'][] = $field->input();
+
+		return $grid;
+	}
+
+	function construct_grid_expensesubject() {
+		$subjects = new Expense_Subjects();
+		$subjects->select();
+		$subjects_name = array('--' => "--") + $subjects->to_array_with_name();
+		if (is_array($this->elements['expensesubject'])) {
+			$expensesubject_id = reset($this->elements['expensesubject']);
+		} else {
+			$expensesubject_id = (int)$this->elements['expensesubject'];
+		}
+		$input = new Html_Select("filtered_expensesubject_id[]", $subjects_name, $expensesubject_id);
+
+		$grid['expensesubject_0'][] = $input->label($GLOBALS['txt_type']);
+		$grid['expensesubject_1'][] = $input->selectbox();
+
+		return $grid;
+	}
+	
+	function construct_grid_invoicelink() {
+		$subjects = new Invoice_Links();
+		$subjects->select();
+		$subjects_name = array('--' => "--") + $subjects->names();
+		if (is_array($this->elements['invoicelink'])) {
+			$invoicelink_id = reset($this->elements['invoicelink']);
+		} else {
+			$invoicelink_id = (int)$this->elements['invoicelink'];
+		}
+		$input = new Html_Select("filtered_invoicelink_id[]", $subjects_name, $invoicelink_id);
+
+		$grid['invoicelink_0'][] = $input->label($GLOBALS['param']['invoice_link']);
+		$grid['invoicelink_1'][] = $input->selectbox();
+
+		return $grid;
+	}
+	
+	function construct_grid_requestoptions() {
+		$grid = array();
+
+		if ($GLOBALS['param']['requestoptions_inputstext']) {
+			$requestoptionstext = input_list_2_array($GLOBALS['param']['requestoptions_inputstext']);
+
+			foreach ($requestoptionstext as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "";
+				$option = new Html_Input("filtered_".$name, $value);
+
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->input();
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_inputsnumber']) {
+			$requestoptionsnumber = input_list_2_array($GLOBALS['param']['requestoptions_inputsnumber']);
+
+			foreach ($requestoptionsnumber as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "";
+				$option = new Html_Input("filtered_".$name, $value);
+
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->input();
+			}
+		}
+		if ($GLOBALS['param']['requestoptions_textareas']) {
+			$requestoptionstextarea = input_list_2_array($GLOBALS['param']['requestoptions_textareas']);
+
+			foreach ($requestoptionstextarea as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "";
+				$option = new Html_Input("filtered_".$name, $value);
+
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->input();
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selectsuser']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selectsuser']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "--";
+
+				$users = new Users();
+				$users->select();
+				$users_name = array('--' => "--") + $users->to_array_with_name();
+
+				$option = new Html_Select("filtered_".$name, $users_name, $value);
+
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->selectbox();
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selects']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selects']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "--";
+
+				$list_options = new Request_List_Options($requestoption);
+				$list_options->select();
+				$list_names = array('--' => "--") + $list_options->to_array_with_names();
+				$option = new Html_Select("filtered_".$name, $list_names, $value);
+
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->selectbox();
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_inputsdate']) {
+			$requestoptionsinputs = input_list_2_array($GLOBALS['param']['requestoptions_inputsdate']);
+
+			foreach ($requestoptionsinputs as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "";
+
+				$option = new Html_Input_Date("filtered_".$name, $value);
+
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->input();
+			}
+		}
+
+		if ($GLOBALS['param']['requestoptions_selectsmulti']) {
+			$requestoptions = input_list_2_array($GLOBALS['param']['requestoptions_selectsmulti']);
+
+			foreach ($requestoptions as $requestoption) {
+				$name = "requestoptions_b64".base64_encode($requestoption);
+				$value = isset($this->elements[$name]) ? $this->elements[$name] : "--";
+
+				$list_options = new Request_List_Options($requestoption);
+				$list_options->select();
+				$list_names = array('--' => "--") + $list_options->to_array_with_names();
+
+				$option = new Html_Select("filtered_".$name, $list_names, $value);
+				$grid[$name.'_0'][] = $option->label($requestoption);
+				$grid[$name.'_1'][] = $option->selectbox();
+			}
+		}
+
+		return $grid;
+	}
+
+	function construct_grid() {
+		$grid = array();
+		
+		foreach ($this->elements as $element_key => $element_selected) {
+			$callback = "construct_grid_".$element_key;
+			if (method_exists($this, $callback)) {
+				$grid_element = $this->$callback();
+				if (is_array($grid_element)) {
+					$grid = array_merge($grid, $grid_element);
+				}
+			}
+		}
+		
+		if (array_key_exists("requestname", $this->elements)) {
+			$grid = array_merge($grid, $this->construct_grid_requestoptions());
+		}
+		
+		$filter = new Html_Button("filter", "apply", Format::label($GLOBALS['txt_filter']));
+		$filter->properties['class'] = "submit";
+
+		$grid['spacer'][] = array('value' => "&nbsp;", 'class' => "small");
+		$grid['submit_0'][] = "&nbsp;";
+		$grid['submit_1'][] = $filter->button();
+		
+		return $grid;
+	}
+	
+	function construct_grid_reset() {
+		$reset = new Html_Button("filter", "reset_session", Format::label(__("reset")));
+		$reset->properties['class'] = "submit-light";
+		
+		$grid['reset'][] = $reset->button();
+		
+		return $grid;
+	}
+
+	function construct_body() {
+		$onsubmit = $this->construct_onsubmit();
+		$id = $this->construct_id();
+		$this->body = "<form method=\"post\" name=\"".$id."\" id=\"".$id."\" action=\"\" onsubmit=\"".$onsubmit."\">";
+		$this->body .= "<input type=\"hidden\" name=\"action\" value=\"filter\" />";
+		$this->body .= show_table(array('lines' => $this->construct_grid()));
+		$this->body .= "</form>\n";
+
+		$this->body .= "<form method=\"post\" name=\"".$id."_reset\" id=\"".$id."_reset\" action=\"\">";
+		$this->body .= show_table(array('lines' => $this->construct_grid_reset()));
+		$this->body .= "</form>\n";
+	}
+}

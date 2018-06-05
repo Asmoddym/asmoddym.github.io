@@ -1,0 +1,7 @@
+package net.noparking.projects.utl
+
+class Math {
+    fun square(n: Float): Float {
+        return n * n
+    }
+}

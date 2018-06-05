@@ -1,0 +1,42 @@
+package net.noparking.projects.view.ImageEditionView
+
+import android.content.Context
+import android.graphics.*
+import android.support.v7.app.AppCompatActivity
+import android.util.AttributeSet
+import android.view.LayoutInflater
+import android.widget.ImageView
+import android.widget.RelativeLayout
+import net.noparking.projects.view.ImageEditionView.canvas.CanvasView
+import net.noparking.projects.R
+
+class ImageEditionView(internal var context: Context, attrs: AttributeSet): RelativeLayout(context, attrs) {
+    private var _bitmap: Bitmap? = null
+    private lateinit var _image: ImageView
+    private lateinit var _canvas: CanvasView
+
+    fun init(image_id: Long, parent_activity: AppCompatActivity) {
+        LayoutInflater.from(context).inflate(R.layout.layout_image_view, this)
+        _image = findViewById(R.id.image_view_image_view)
+        _canvas = findViewById(R.id.image_view_canvas_view)
+        _canvas.init(image_id, parent_activity)
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        _image.setImageBitmap(_bitmap)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+    }
+
+    fun setBitmap(bitmap: Bitmap?) {
+        _bitmap = bitmap
+        _image.setImageBitmap(bitmap)
+    }
+
+    fun getCanvas(): CanvasView {
+        return _canvas
+    }
+}

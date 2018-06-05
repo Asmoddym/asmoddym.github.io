@@ -1,0 +1,50 @@
+package net.noparking.projects.database.polygon_annotation
+
+import android.content.Context
+import android.os.AsyncTask
+
+class PolygonAnnotationAsyncDelete : AsyncTask<Void, Void, Void>() {
+	private var _items_database: PolygonAnnotationDatabase? = null
+	private var _func: (() -> Unit)? = null
+	private var _polygon_id: Long? = null
+	private var _image_id: Long? = null
+
+	fun init(context: Context): PolygonAnnotationAsyncDelete {
+		_items_database = PolygonAnnotationDatabase.getInstance(context)
+		return this
+	}
+
+	override fun doInBackground(vararg params: Void): Void? {
+		if (_polygon_id != null) {
+			_items_database?.PolygonAnnotationDataDao()?.deleteByPolygonId(_polygon_id!!)
+		} else if (_image_id != null) {
+			_items_database?.PolygonAnnotationDataDao()?.deleteByImageId(_image_id!!)
+		} else {
+			_items_database?.PolygonAnnotationDataDao()?.deleteAll()
+		}
+		return null
+	}
+
+	fun deleteByPolygonId(id: Long): PolygonAnnotationAsyncDelete {
+		_polygon_id = id
+		return this
+	}
+
+	fun deleteByImageId(id: Long): PolygonAnnotationAsyncDelete {
+		_image_id = id
+		return this
+	}
+
+	fun afterQuery(func: () -> Unit): PolygonAnnotationAsyncDelete {
+		_func = func
+		return this
+	}
+
+	override fun onPostExecute(result: Void?) {
+		super.onPostExecute(result)
+		if (_func != null) {
+			_func?.invoke()
+			_func = null
+		}
+	}
+}

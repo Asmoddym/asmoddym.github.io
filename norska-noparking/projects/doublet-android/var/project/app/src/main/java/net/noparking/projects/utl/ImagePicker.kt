@@ -1,0 +1,81 @@
+package net.noparking.projects.utl
+
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Intent
+import android.net.Uri
+import android.provider.MediaStore
+import net.noparking.projects.R
+
+class ImagePicker(internal val activity: Activity, internal val directory: Directory) {
+	private lateinit var _dialog: AlertDialog
+	private lateinit var _image: Image
+
+	init {
+		createImage()
+		initDialog()
+	}
+
+	fun reset() {
+		_image.create()
+	}
+
+	fun stop() {
+		_dialog.dismiss()
+		initDialog()
+		_dialog.show()
+	}
+
+	private fun createImage() {
+		_image = Image(activity.baseContext, directory, activity.contentResolver)
+		_image.create()
+	}
+
+	private fun initDialog() {
+		_dialog = AlertDialog.Builder(activity).setTitle(activity.getString(R.string.choose_an_image))
+				.setItems(arrayOf(activity.getString(R.string.gallery), activity.getString(R.string.camera)), { dialog, which ->
+					when (which) {
+						0 -> chooseImageFromGallery()
+						1 -> chooseImageFromCamera()
+					}
+				})
+				.create()
+	}
+
+	fun show() {
+		_dialog.show()
+	}
+
+	private fun chooseImageFromCamera() {
+		val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, _image.uri)
+		activity.startActivityForResult(intent, PICTURE_FROM_CAMERA_CODE)
+	}
+
+	private fun chooseImageFromGallery() {
+		val intent = Intent(Intent.ACTION_GET_CONTENT)
+		intent.type = "image/*"
+		activity.startActivityForResult(Intent.createChooser(intent, activity.getString(R.string.choose_an_image)), PICTURE_FROM_GALLERY_CODE)
+	}
+
+	fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?): Image {
+		when (requestCode) {
+			PICTURE_FROM_GALLERY_CODE -> {
+				if (data == null || data.data == null) {
+					_image.uri = Uri.EMPTY
+					return _image
+				}
+				val input = activity.contentResolver.openInputStream(data.data as Uri)
+				_image.file.writeBytes(input.readBytes())
+			}
+			PICTURE_FROM_CAMERA_CODE -> {
+			}
+		}
+		return _image
+	}
+
+	companion object {
+		val PICTURE_FROM_CAMERA_CODE = 0
+		val PICTURE_FROM_GALLERY_CODE = 1
+	}
+}

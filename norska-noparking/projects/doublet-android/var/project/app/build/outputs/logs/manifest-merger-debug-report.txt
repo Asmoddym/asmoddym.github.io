@@ -1,0 +1,157 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+MERGED from [petrov.kristiyan:colorpicker-library:1.1.8] /home/sylvain/.gradle/caches/transforms-1/files-1.1/colorpicker-library-1.1.8.aar/522798ed0e5ee1dbddd460042c6ae775/AndroidManifest.xml:2:1-12:12
+MERGED from [com.android.support:appcompat-v7:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/appcompat-v7-27.1.1.aar/81b204dc5a48dbaa23342d8fba9fa5f5/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support.constraint:constraint-layout:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.1.0.aar/23e39337df1698d30ad8320ed6eafcd3/AndroidManifest.xml:2:1-11:12
+MERGED from [android.arch.persistence.room:runtime:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/174ed2482b1e1adaf6c61b199cbea20c/AndroidManifest.xml:17:1-24:12
+MERGED from [android.arch.lifecycle:livedata:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/livedata-1.1.1.aar/19d5f7408d1b7bb3c5c7b02ef80de8a3/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.persistence:db-framework:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/db-framework-1.0.0.aar/d2844ab7750144e8ded9564ca630ab7b/AndroidManifest.xml:17:1-24:12
+MERGED from [android.arch.persistence:db:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/db-1.0.0.aar/c27578e4ccd81dfcd181f408a1d0c63f/AndroidManifest.xml:17:1-24:12
+MERGED from [com.android.support:recyclerview-v7:27.0.2] /home/sylvain/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-27.0.2.aar/ff569345926df14334564cce451ff462/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-fragment:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-fragment-27.1.1.aar/f56d3cc1a00c7f89ea8a720d8c27d1bb/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:livedata-core:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/livedata-core-1.1.1.aar/13fdfb3a2e140f23dfef9dd939bb62c1/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.core:runtime:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.1.1.aar/553c167e9ad63b04cbee93d12595ece7/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:animated-vector-drawable:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-27.1.1.aar/77ade8049a0c4887fc5cf29cdd1625f3/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-ui:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-core-ui-27.1.1.aar/f9af88069c8b9c475cc9bfa09ef121ec/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-core-utils:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-core-utils-27.1.1.aar/903f81ad0cbbd3da11d86c2ddeb4fcf5/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-vector-drawable:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-27.1.1.aar/21add65930d9d1f1956e47ed52f14bc7/AndroidManifest.xml:17:1-22:12
+MERGED from [com.android.support:support-compat:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-compat-27.1.1.aar/ae203b358e12835568c9e6e08ab65af5/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:runtime:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.1.0.aar/9bf4a3a2239026dc7b2ad1c9ff3fda71/AndroidManifest.xml:17:1-22:12
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/viewmodel-1.1.0.aar/b0ad350c32ca4d78d98caa5eb6f6fa56/AndroidManifest.xml:17:1-22:12
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+	package
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:3:5-37
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:1-37:12
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:5:5-81
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:5:22-78
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:6:5-80
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:6:22-77
+application
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:8:5-35:19
+MERGED from [com.android.support.constraint:constraint-layout:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.1.0.aar/23e39337df1698d30ad8320ed6eafcd3/AndroidManifest.xml:9:5-20
+MERGED from [com.android.support.constraint:constraint-layout:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.1.0.aar/23e39337df1698d30ad8320ed6eafcd3/AndroidManifest.xml:9:5-20
+	android:supportsRtl
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:13:9-35
+	android:label
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:11:9-41
+	android:roundIcon
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:12:9-54
+	android:icon
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:10:9-43
+	android:allowBackup
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:9:9-35
+	android:theme
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:14:9-40
+provider#android.support.v4.content.FileProvider
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:15:9-23:20
+	android:grantUriPermissions
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:19:13-47
+	android:authorities
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:17:13-70
+	android:exported
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:18:13-37
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:16:13-67
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:20:13-22:54
+	android:resource
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:22:17-51
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:21:17-67
+activity#net.noparking.projects.MainActivity
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:25:9-31:20
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:25:19-47
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:26:13-30:29
+action#android.intent.action.MAIN
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:27:17-69
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:27:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:29:17-77
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:29:27-74
+activity#net.noparking.projects.activity.ImageEditionActivity
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:32:9-67
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:32:19-64
+activity#net.noparking.projects.activity.ProjectsManagerActivity
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:33:9-70
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:33:19-67
+activity#net.noparking.projects.activity.ProjectManagerActivity
+ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:34:9-69
+	android:name
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml:34:19-66
+uses-sdk
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+MERGED from [petrov.kristiyan:colorpicker-library:1.1.8] /home/sylvain/.gradle/caches/transforms-1/files-1.1/colorpicker-library-1.1.8.aar/522798ed0e5ee1dbddd460042c6ae775/AndroidManifest.xml:8:5-10:41
+MERGED from [petrov.kristiyan:colorpicker-library:1.1.8] /home/sylvain/.gradle/caches/transforms-1/files-1.1/colorpicker-library-1.1.8.aar/522798ed0e5ee1dbddd460042c6ae775/AndroidManifest.xml:8:5-10:41
+MERGED from [com.android.support:appcompat-v7:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/appcompat-v7-27.1.1.aar/81b204dc5a48dbaa23342d8fba9fa5f5/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:appcompat-v7:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/appcompat-v7-27.1.1.aar/81b204dc5a48dbaa23342d8fba9fa5f5/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support.constraint:constraint-layout:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.1.0.aar/23e39337df1698d30ad8320ed6eafcd3/AndroidManifest.xml:5:5-7:41
+MERGED from [com.android.support.constraint:constraint-layout:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/constraint-layout-1.1.0.aar/23e39337df1698d30ad8320ed6eafcd3/AndroidManifest.xml:5:5-7:41
+MERGED from [android.arch.persistence.room:runtime:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/174ed2482b1e1adaf6c61b199cbea20c/AndroidManifest.xml:20:5-22:41
+MERGED from [android.arch.persistence.room:runtime:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.0.0.aar/174ed2482b1e1adaf6c61b199cbea20c/AndroidManifest.xml:20:5-22:41
+MERGED from [android.arch.lifecycle:livedata:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/livedata-1.1.1.aar/19d5f7408d1b7bb3c5c7b02ef80de8a3/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/livedata-1.1.1.aar/19d5f7408d1b7bb3c5c7b02ef80de8a3/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.persistence:db-framework:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/db-framework-1.0.0.aar/d2844ab7750144e8ded9564ca630ab7b/AndroidManifest.xml:20:5-22:41
+MERGED from [android.arch.persistence:db-framework:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/db-framework-1.0.0.aar/d2844ab7750144e8ded9564ca630ab7b/AndroidManifest.xml:20:5-22:41
+MERGED from [android.arch.persistence:db:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/db-1.0.0.aar/c27578e4ccd81dfcd181f408a1d0c63f/AndroidManifest.xml:20:5-22:41
+MERGED from [android.arch.persistence:db:1.0.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/db-1.0.0.aar/c27578e4ccd81dfcd181f408a1d0c63f/AndroidManifest.xml:20:5-22:41
+MERGED from [com.android.support:recyclerview-v7:27.0.2] /home/sylvain/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-27.0.2.aar/ff569345926df14334564cce451ff462/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:recyclerview-v7:27.0.2] /home/sylvain/.gradle/caches/transforms-1/files-1.1/recyclerview-v7-27.0.2.aar/ff569345926df14334564cce451ff462/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-fragment-27.1.1.aar/f56d3cc1a00c7f89ea8a720d8c27d1bb/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-fragment:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-fragment-27.1.1.aar/f56d3cc1a00c7f89ea8a720d8c27d1bb/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/livedata-core-1.1.1.aar/13fdfb3a2e140f23dfef9dd939bb62c1/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:livedata-core:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/livedata-core-1.1.1.aar/13fdfb3a2e140f23dfef9dd939bb62c1/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.1.1.aar/553c167e9ad63b04cbee93d12595ece7/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.core:runtime:1.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.1.1.aar/553c167e9ad63b04cbee93d12595ece7/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-27.1.1.aar/77ade8049a0c4887fc5cf29cdd1625f3/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:animated-vector-drawable:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/animated-vector-drawable-27.1.1.aar/77ade8049a0c4887fc5cf29cdd1625f3/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-core-ui-27.1.1.aar/f9af88069c8b9c475cc9bfa09ef121ec/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-ui:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-core-ui-27.1.1.aar/f9af88069c8b9c475cc9bfa09ef121ec/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-core-utils-27.1.1.aar/903f81ad0cbbd3da11d86c2ddeb4fcf5/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-core-utils:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-core-utils-27.1.1.aar/903f81ad0cbbd3da11d86c2ddeb4fcf5/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-27.1.1.aar/21add65930d9d1f1956e47ed52f14bc7/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-vector-drawable:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-vector-drawable-27.1.1.aar/21add65930d9d1f1956e47ed52f14bc7/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-compat-27.1.1.aar/ae203b358e12835568c9e6e08ab65af5/AndroidManifest.xml:20:5-44
+MERGED from [com.android.support:support-compat:27.1.1] /home/sylvain/.gradle/caches/transforms-1/files-1.1/support-compat-27.1.1.aar/ae203b358e12835568c9e6e08ab65af5/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.1.0.aar/9bf4a3a2239026dc7b2ad1c9ff3fda71/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:runtime:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/runtime-1.1.0.aar/9bf4a3a2239026dc7b2ad1c9ff3fda71/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/viewmodel-1.1.0.aar/b0ad350c32ca4d78d98caa5eb6f6fa56/AndroidManifest.xml:20:5-44
+MERGED from [android.arch.lifecycle:viewmodel:1.1.0] /home/sylvain/.gradle/caches/transforms-1/files-1.1/viewmodel-1.1.0.aar/b0ad350c32ca4d78d98caa5eb6f6fa56/AndroidManifest.xml:20:5-44
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		ADDED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml
+		INJECTED from /home/sylvain/Documents/projets/norska-noparking/projects/doublet-android/var/project/app/src/main/AndroidManifest.xml

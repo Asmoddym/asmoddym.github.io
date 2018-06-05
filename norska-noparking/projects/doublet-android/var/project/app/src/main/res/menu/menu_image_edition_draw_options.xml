@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_image_edition_draw_options_polygons"
+        android:title="@string/forms" />
+    <item
+        android:id="@+id/menu_image_edition_draw_options_pencil"
+        android:title="@string/free_drawing" />
+
+    <item
+        android:id="@+id/menu_image_edition_draw_options_annotations"
+        android:title="@string/annotations" />
+</menu>

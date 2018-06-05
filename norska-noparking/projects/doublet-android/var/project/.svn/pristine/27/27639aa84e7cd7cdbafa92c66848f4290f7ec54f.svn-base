@@ -1,0 +1,10 @@
+package net.noparking.projects.database.project
+
+import android.arch.persistence.room.*
+
+@Entity(tableName = "projects")
+data class Project(@PrimaryKey(autoGenerate = true) var id: Long?,
+                   @ColumnInfo(name = "project_name") var project_name: String,
+                   @ColumnInfo(name = "directory") var directory: String) {
+    constructor():this(null,"","")
+}

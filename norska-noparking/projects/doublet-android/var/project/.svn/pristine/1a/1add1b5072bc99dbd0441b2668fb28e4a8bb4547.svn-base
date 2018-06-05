@@ -1,0 +1,112 @@
+package net.noparking.projects.utl
+
+import android.graphics.Color
+import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.view.ViewGroup
+import kotlinx.android.synthetic.main.layout_project_item_parametring.view.*
+import net.noparking.projects.R
+import petrov.kristiyan.colorpicker.ColorPicker
+
+class ProjectItemParametring(internal val activity: AppCompatActivity) {
+	private val _view = activity.layoutInflater.inflate(R.layout.layout_project_item_parametring, null)
+	private var _on_save: ((String, Int) -> Unit)? = null
+	private var _on_delete: (() -> Unit)? = null
+	private var _color: Int = Color.TRANSPARENT
+	private var _comparison_method: ((String) -> Boolean)? = null
+
+	private lateinit var _default_input: String
+
+	fun setDefaultInput(str: String): ProjectItemParametring {
+		_default_input = str
+		_view.layout_project_item_parametring_input.text.replace(0, _view.layout_project_item_parametring_input.text.length, str)
+		return this
+	}
+
+	fun setDefaultColor(color: Int): ProjectItemParametring {
+		_color = color
+		_view.layout_project_item_parametring_pick_color.setBackgroundColor(_color)
+		return this
+	}
+
+	fun setOnSaveAction(f: (name: String, color: Int) -> Unit): ProjectItemParametring {
+		_on_save = f
+		return this
+	}
+
+	fun setOnDeleteAction(f: () -> Unit): ProjectItemParametring {
+		_on_delete = f
+		return this
+	}
+
+	fun setComparisonMethod(f: (input: String) -> Boolean): ProjectItemParametring {
+		_comparison_method = f
+		return this
+	}
+
+	fun show() {
+		val picker = AlertDialog.Builder(activity)
+				.setView(_view)
+				.setOnDismissListener {
+					if (_view.parent != null) {
+						(_view.parent as ViewGroup).removeView(_view)
+					}
+				}
+				.create()
+
+		_view.layout_project_item_parametring_pick_color.setOnClickListener {
+			val colorPicker = ColorPicker(activity)
+			colorPicker.setTitle(activity.getString(R.string.choose_a_color))
+			colorPicker.setOnFastChooseColorListener(object : ColorPicker.OnFastChooseColorListener {
+				override fun setOnFastChooseColorListener(position: Int, color: Int) {
+					_color = color
+					_view.layout_project_item_parametring_pick_color.setBackgroundColor(_color)
+				}
+				override fun onCancel() {}
+			}).show()
+		}
+
+		if (_on_delete != null) {
+			_view.layout_project_item_parametring_delete.setOnClickListener {
+				picker.dismiss()
+				AlertDialog.Builder(activity)
+						.setTitle(activity.getString(R.string.confirm_the_deletion))
+						.setPositiveButton(activity.getString(R.string.confirm), { _, _ ->
+							_on_delete?.invoke()
+						})
+						.setNegativeButton(activity.getString(R.string.cancel), { _, _ -> })
+						.show()
+			}
+		}
+
+		if (_on_save != null) {
+			_view.layout_project_item_parametring_save.setOnClickListener {
+				picker.dismiss()
+				_on_save?.invoke(_view.layout_project_item_parametring_input.text.toString(), _color)
+			}
+		}
+
+		_view.layout_project_item_parametring_input.addTextChangedListener(object : TextWatcher {
+			override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+			override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+			override fun afterTextChanged(s: Editable?) {
+				val comparison =  when (_comparison_method) {
+					null -> false
+					else -> when (s.toString() == _default_input) {
+						true -> false
+						else -> _comparison_method?.invoke(s.toString())
+					}
+				}
+				_view.layout_project_item_parametring_name_already_taken.visibility = when (comparison) { true -> View.VISIBLE else -> View.INVISIBLE}
+
+				_view.layout_project_item_parametring_save.setOnTouchListener { v, event -> comparison!! }
+				_view.layout_project_item_parametring_save.alpha = when (comparison) { true -> 0.3f else -> 1f }
+			}
+		})
+
+		picker.show()
+	}
+}

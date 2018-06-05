@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="net.noparking.projects.ExampleUnitTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2018-05-25T14:16:28" hostname="Bobby" time="0.004">
+  <properties/>
+  <testcase name="c" classname="net.noparking.projects.ExampleUnitTest" time="0.003"/>
+  <testcase name="addition_isCorrect" classname="net.noparking.projects.ExampleUnitTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

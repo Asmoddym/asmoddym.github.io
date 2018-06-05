@@ -1,0 +1,53 @@
+<resources>
+    <string name="app_name">Projects</string>
+    <string name="img_directory">doublet-projects</string>
+
+    <string name="projects_directory">doublet-projects</string>
+
+    <string name="ok">ok</string>
+    <string name="cancel">Annuler</string>
+    <string name="name">Nom</string>
+
+    <string name="choose_an_image">Choisissez une photo</string>
+    <string name="choose_a_color">Choisissez une couleur</string>
+
+    <string name="gallery">Galerie</string>
+    <string name="camera">Appareil photo</string>
+
+    <string name="unable_to_get_bitmap_from_image">Impossible de charger l\'image</string>
+
+    <string name="forms">Formes</string>
+    <string name="free_drawing">Dessin libre</string>
+    <string name="annotations">Annotations</string>
+
+    <string name="unit_side_annotations">m</string>
+    <string name="unit_surface_annotations">m2</string>
+
+    <string name="handle_annotations">Gérer les annotations</string>
+
+    <string name="surface">Surface</string>
+    <string name="height">Hauteur</string>
+    <string name="width">Largeur</string>
+    <string name="comment">Commentaire</string>
+
+    <string name="new_project">Nouveau projet</string>
+    <string name="project_name">Nom du projet</string>
+    <string name="this_project_name_is_already_taken">Ce nom de projet est déjà pris</string>
+    <string name="choose_a_project_name">Choisissez un nom de projet</string>
+
+
+    <string name="new_image">Nouvelle image</string>
+    <string name="image_name">Nom d\'image</string>
+    <string name="this_image_name_is_already_taken">Ce nom d\'image est déjà pris</string>
+    <string name="choose_an_image_name">Choisissez un nom d\'image</string>
+
+    <string name="this_name_is_already_taken">Ce nom est déjà pris</string>
+    <string name="save_and_quit">Sauvegarder et quitter</string>
+
+    <string name="save">Sauvegarder</string>
+    <string name="delete">Supprimer</string>
+
+    <string name="confirm">Confirmer</string>
+
+    <string name="confirm_the_deletion">Confirmez la suppression</string>
+</resources>
