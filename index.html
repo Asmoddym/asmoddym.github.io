@@ -1,13 +1,197 @@
-<html>
-  <title>XUNTOS</title>
-  <head>
-    <link rel="stylesheet" href="css/style.css">
-    <meta http-equiv="refresh" content="0;URL=https://www.github.com/Asmoddym">
-  </head>
-<!--  <body>
-    <div id="xuntos">
-      <h1>XUNTOS</h1>
-      <img src="./img/xuntos.jpg"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clickable Images Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .gallery {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .image-container {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .image-container:hover {
+            transform: scale(1.05);
+        }
+
+        .image-container img {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .image-container:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .message-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .message-text {
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .gallery {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .image-container img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>VITE DES INDICES</h1>
+    
+    <div class="gallery">
+        <div class="image-container" onclick="showMessage('nature')">
+            <img src="https://images.getrecipekit.com/20220527173856-short-ribs.png?aspect_ratio=4:3&quality=90&" alt="Mountain landscape">
+            <div class="image-overlay">
+                <span>1er indice</span>
+            </div>
+        </div>
+        
+        <div class="image-container" onclick="showMessage('ocean')">
+            <img src="https://imusic.b-cdn.net/images/item/original/157/7333018019157.jpg?2021-monster-hunter-dvd&class=scaled&v=1646063597" alt="Ocean waves">
+            <div class="image-overlay">
+                <span>2e indice</span>
+            </div>
+        </div>
+        
+        <div class="image-container" onclick="showMessage('city')">
+            <img src="https://cdn.download.ams.birds.cornell.edu/api/v2/asset/253662891/900" alt="City skyline">
+            <div class="image-overlay">
+                <span>3e indice</span>
+            </div>
+        </div>
     </div>
-  </body>-->
+    
+    <div class="message-display">
+        <div class="message-text" id="messageText">
+          ET BON ANNIIIIIIIV !
+        </div>
+    </div>
+
+    <script>
+        const messages = {
+          nature: "3x7",
+          ocean: "vite fait pi",
+          city: "Clair obscur, expedition........."
+        };
+
+        function showMessage(type) {
+            const messageElement = document.getElementById('messageText');
+            const messageDisplay = document.querySelector('.message-display');
+            
+            // Add fade-in animation
+            messageDisplay.classList.remove('fade-in');
+            
+            setTimeout(() => {
+                messageElement.textContent = messages[type];
+                messageDisplay.classList.add('fade-in');
+            }, 100);
+            
+            // Add a subtle shake effect to draw attention
+            messageDisplay.style.animation = 'none';
+            setTimeout(() => {
+                messageDisplay.style.animation = 'fadeIn 0.5s ease-in';
+            }, 10);
+        }
+
+        // Add keyboard support
+        document.addEventListener('keydown', function(event) {
+            if (event.key === '1') showMessage('nature');
+            if (event.key === '2') showMessage('ocean');
+            if (event.key === '3') showMessage('city');
+        });
+
+        // Add some interactive feedback
+        document.querySelectorAll('.image-container').forEach(container => {
+            container.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                }, 100);
+            });
+        });
+    </script>
+</body>
 </html>
+
