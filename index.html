@@ -84,6 +84,7 @@
             justify-content: center;
             max-width: 600px;
             width: 100%;
+            margin-bottom: 30px;
         }
 
         .message-text {
@@ -117,34 +118,34 @@
 <body>
     <h1>VITE DES INDICES</h1>
     
+    <div class="message-display">
+      <div class="message-text" id="messageText">
+        Clique sur les images pour avoir des indices, mon tout contient 5 chiffres !
+      </div>
+    </div>
     <div class="gallery">
         <div class="image-container" onclick="showMessage('nature')">
-            <img src="https://images.getrecipekit.com/20220527173856-short-ribs.png?aspect_ratio=4:3&quality=90&" alt="Mountain landscape">
+            <img src="https://eherge2.com/wp-content/uploads/2016/12/Oreille-Casse%CC%81e-Graph-1024x1024.png" alt="Mountain landscape">
             <div class="image-overlay">
                 <span>1er indice</span>
             </div>
         </div>
         
         <div class="image-container" onclick="showMessage('ocean')">
-            <img src="https://imusic.b-cdn.net/images/item/original/157/7333018019157.jpg?2021-monster-hunter-dvd&class=scaled&v=1646063597" alt="Ocean waves">
+            <img src="https://www.decolia.fr/308-large_default/sticker-pirate-barbe-rousse.jpg" alt="Ocean waves">
             <div class="image-overlay">
                 <span>2e indice</span>
             </div>
         </div>
         
         <div class="image-container" onclick="showMessage('city')">
-            <img src="https://cdn.download.ams.birds.cornell.edu/api/v2/asset/253662891/900" alt="City skyline">
+            <img src="https://www.carrementfleurs.com/modules/prestablog/views/img/grid-for-1-7/up-img/thumb_46.jpg?1ab185cc9b6c870f6f482ec623eada7c" alt="City skyline">
             <div class="image-overlay">
                 <span>3e indice</span>
             </div>
         </div>
     </div>
     
-    <div class="message-display">
-        <div class="message-text" id="messageText">
-          ET BON ANNIIIIIIIV !
-        </div>
-    </div>
 
     <script>
         const messages = {
